@@ -1,6 +1,7 @@
+// components/ui/AvatarButton.tsx
 'use client';
 
-import { Button } from '@/src/components/ui/Buttons';
+import { Button } from '@components/ui/Buttons';
 
 export default function AvatarButton({ src, size = 32, alt = "Perfil" }: { src: string; size?: number; alt?: string }) {
   return (

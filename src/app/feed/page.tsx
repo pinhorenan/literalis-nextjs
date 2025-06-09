@@ -1,9 +1,9 @@
-// src/app/feed/page.tsx
+// app/feed/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
-import Sidebar from '@/src/components/layout/Sidebar';
-import PostCard, { PostWithRelations, CommentWithAuthor } from '@/src/components/feed/PostCard';
+import { MainSidebar, RecommendedSidebar } from '@components/layout/Sidebar';
+import PostCard, { PostWithRelations, CommentWithAuthor } from '@components/feed/PostCard';
 
 export default function PageFeed() {
   const [posts, setPosts] = useState<PostWithRelations[]>([]);
@@ -56,7 +56,9 @@ export default function PageFeed() {
   return (
     <section className="flex gap-4">
       {/* Sidebar principal */}
-      <Sidebar variant="main" />
+      <MainSidebar
+        // Se precisar, passe aqui onNewBook / props de progresso
+      />
 
       {/* Feed */}
       <main className="flex-1 px-4 py-6 space-y-6">
@@ -77,8 +79,8 @@ export default function PageFeed() {
         )}
       </main>
 
-      {/* Sidebar de recomendados */}
-      <Sidebar variant="recommended" />
+      {/* Sidebar de recomendações */}
+      <RecommendedSidebar />
     </section>
   );
 }

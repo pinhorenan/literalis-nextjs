@@ -1,13 +1,14 @@
+// app/page.tsx 
 import Image from 'next/image';
-import Link from 'next/link';
 import React from 'react';
-import { Button } from '@/src/components/ui/Buttons';
+import Link  from 'next/link';
+
+import { Button } from '@components/ui/Buttons';
 
 export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen">
       <section className="container mx-auto px-6 py-16 flex flex-col lg:flwx-row items-center gap-12">
-        { /* Bloco de texto e CTA */}
         <div className="max-w-lg space-y-6 text-center lg:text-left">
           <h1 className="text-4x1 lg:text-5x1 font-bold text-[var-(--text-primary)]">
             Bem-vindo ao Literalis
@@ -20,7 +21,6 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Ilustração */}
         <div className="relative w-full max-w-md">
           <Image
             src="/assets/images/landing-illustration.svg"

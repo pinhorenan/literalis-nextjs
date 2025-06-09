@@ -1,7 +1,8 @@
+// components/feed/FeedSwitch.tsx
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/src/components/ui/Buttons';
+import { Button } from '@components/ui/Buttons';
 
 export type Tab = 'discover' | 'friends';
 

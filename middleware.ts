@@ -1,3 +1,4 @@
+// middleware.ts
 import { withAuth } from 'next-auth/middleware'
 
 export default withAuth({
@@ -9,7 +10,8 @@ export default withAuth({
     },
   },
   pages: {
-    signIn: '/login',      // rota para a página de login
+    signIn: '/auth/login',      // rota para a página de login
+    signUp: '/auth/register',    // rota para a página de cadastro (opcional)
     error:  '/auth/error', // rota de erro (opcional)
   },
 })

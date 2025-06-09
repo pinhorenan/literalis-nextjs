@@ -1,12 +1,13 @@
+// server/auth.ts
 import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { db } from "@/src/server/db";
+import { prisma } from "@server/prisma";
 
 export const authOptions: NextAuthOptions = {
   // ───────────────────────────────────────────────────────────────
-  adapter: PrismaAdapter(db),          // ainda usamos o adapter ⇠ User no DB
+  adapter: PrismaAdapter(prisma),          // ainda usamos o adapter ⇠ User no DB
   session: { strategy: "jwt" },        // ⇦ trocado para JWT
   // ───────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials) return null;
 
-        const user = await db.user.findUnique({
+        const user = await prisma.user.findUnique({
           where: { username: credentials.username },
         });
         if (!user || !user.password) return null;

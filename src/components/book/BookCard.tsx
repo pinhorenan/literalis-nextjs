@@ -1,3 +1,4 @@
+// components/book/BookCard.tsx
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Book } from '@prisma/client';

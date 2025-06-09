@@ -1,16 +1,19 @@
-// src/components/feed/PostCard.tsx
+// components/feed/PostCard.tsx
 'use client';
 
-import Link from 'next/link';
+import { useEffect, useRef, useState }    from 'react';
+import { Heart, MessageCircle }           from 'lucide-react';
+import { useSession }                     from 'next-auth/react';
+import { useRouter }                      from 'next/navigation';
+
+import { Button }       from '@components/ui/Buttons';
+import { relativeTime } from '@hooks/relativeTime';
+
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
-import { Heart, MessageCircle } from 'lucide-react';
-import { Button } from '@/src/components/ui/Buttons';
+import Link from  'next/link';
+import clsx from  'clsx';
+
 import type { Post, User, Book, Comment } from '@prisma/client';
-import { relativeTime } from '@/src/lib/relativeTime';
 
 export type CommentWithAuthor = Comment & { author: User };
 
@@ -101,7 +104,7 @@ export default function PostCard({ post, onAddComment }: Props) {
       {/* HEADER: autor + follow */}
       <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <Link href={`/profile/${post.author.id}`}>
+          <Link href={`/profile/${post.author.username}`}>
             <Image
               src={post.author.avatarPath || '/assets/images/users/default.jpg'}
               alt={post.author.name}
@@ -111,7 +114,7 @@ export default function PostCard({ post, onAddComment }: Props) {
             />
           </Link>
           <div>
-            <Link href={`/profile/${post.author.id}`} className="font-semibold hover:underline">
+            <Link href={`/profile/${post.author.username}`} className="font-semibold hover:underline">
               {post.author.name}
             </Link>
             <time className="block text-xs text-[var(--text-secondary)]">

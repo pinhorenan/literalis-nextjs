@@ -1,3 +1,4 @@
+// server/http.ts
 import { NextResponse } from 'next/server'
 
 export const json = (data: unknown, status = 200) =>

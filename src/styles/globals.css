@@ -77,8 +77,9 @@ html, body {
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  --size-header: 60px;
-  --size-sidebar: 300px;
+  --size-header: 4rem;
+  --size-sidebar: 16rem;
+  --size-footer: 10rem
   
   --radius-sm: 0.3125rem; /* 5px */
   --radius-md: 0.5rem;    /* 8px */

@@ -1,0 +1,1 @@
+// app/auth/error/page.tsx

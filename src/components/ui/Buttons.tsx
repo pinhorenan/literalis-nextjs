@@ -1,4 +1,5 @@
-'use client'
+// components/ui/Buttons.tsx
+'use client';
 
 import React, { useEffect, useState } from 'react'
 import clsx from 'clsx'
