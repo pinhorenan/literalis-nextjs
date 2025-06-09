@@ -1,94 +1,36 @@
-// app/api/users/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/src/lib/prisma';
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
+import bcrypt from 'bcryptjs'
+import { db } from '@/src/server/db'
+import { json, conflict, badRequest, serverError } from '@/src/server/http'
 
-/**
- * GET /api/users?usersId=abc
- * Se houver query 'usersId', devolve só os usuários com esses IDs.
- * Senão, devolve todos os usuários.
- */
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+const UserInput = z.object({
+  username:   z.string().regex(/^[a-z0-9_]+$/i),
+  name:       z.string().min(1),
+  avatarPath: z.string().min(1),
+  bio:        z.string().max(160).optional(),
+  email:      z.string().email().optional(),
+  password:   z.string().min(6).optional(),
+})
 
-        let users;
-        if (userId) {
-            // Busca um único usuário por ID
-            const user = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!user) {
-                return NextResponse.json(
-                    { error: 'Usuário com id="${userId}" não encontrado.' },
-                    { status: 404 }
-                );
-            }
-            users = user;
-        } else {
-            // Busca todos os usuários
-            users = await prisma.user.findMany({
-                orderBy: { name: 'asc' },
-            });
-        }
-
-        return NextResponse.json(users, { status: 200 });
-    } catch (error: any) {
-        console.error('GET /api/users error:', error);
-        return NextResponse.json(
-            { error: 'Erro ao buscar usuários.' },
-            { status: 500 }
-        );
-    }
+export async function GET() {
+  try {
+    const users = await db.user.findMany({ orderBy: { name: 'asc' } })
+    return json(users)
+  } catch (e) { console.error(e); return serverError() }
 }
 
-/**
- * POST /api/users
- * Body JSON esperado:
- * {
- * "username": "pinhorenan",
- * "name"; "Renan Pinho",
- * "avatarPath": "/assets/users/pinhorenan.jpg",
- * }
- */
-export async function POST(request: NextRequest) {
-    try {
-        const data = await request.json();
-
-        // vALIDAÇÕES BÁSICAS
-        if (
-            typeof data.username    !== 'string' ||
-            typeof data.name        !== 'string' ||
-            typeof data.avatarPath  !== 'string'
-        ) {
-            return NextResponse.json(
-                { error: 'username, name e avatarPath são obrigatórios.' },
-                { status: 400 }
-            );
-        }
-
-        // Cria o usuário no banco
-        const newUser = await prisma.user.create({
-            data: {
-                username:   data.username,
-                name:       data.name,
-                avatarPath: data.avatarPath,
-            },
-    });
-
-    return NextResponse.json(newUser, { status: 201 });
-    } catch (error: any) {
-        console.error('POST /api/users error:', error);
-        // Caso ultra violação de unique (por ex., username duplicado)
-        if (error.code === 'P2002') {
-            return NextResponse.json(
-                { error: 'Username já existe.' },
-                { status: 409 }
-            );
-        }
-        return NextResponse.json(
-            { error: 'Erro ao criar usuário.' },
-            { status: 500 }
-        );
-    }
+export async function POST(req: NextRequest) {
+  try {
+    const data = UserInput.parse(await req.json())
+    const hash = data.password ? await bcrypt.hash(data.password, 10) : null
+    const user = await db.user.create({
+      data: { ...data, password: hash ?? undefined },
+    })
+    return json(user, 201)
+  } catch (e: any) {
+    if (e.code === 'P2002')      return conflict('username ou e-mail já existe')
+    if (e instanceof z.ZodError) return badRequest(e.message)
+    console.error(e);            return serverError()
+  }
 }

@@ -1,43 +1,72 @@
-'use client'
+'use client';
 
-import { useState }                   from 'react'
-import { useRouter }                  from 'next/navigation'      // ou 'next/router' se estiver usando pages-router
-import { MessageSquare, Bell, Menu }  from 'lucide-react'
+import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import clsx from 'clsx';
+import { useSession, signOut } from 'next-auth/react';
 
-import { Logo }                       from '@/src/components/ui/Logo'
-import { IconButton }                 from '@/src/components/ui/IconButton'
-import { SearchBar }                  from '@/src/components/search/SearchBar'
-import ProfileMenu                    from '@/src/components/layout/ProfileMenu'
+import ProfileMenu from '@/src/components/navigation/ProfileMenu';
+import { Button, ThemeToggle } from '@/src/components/ui/Buttons';
+import { SearchBar } from '@/src/components/search/SearchBar';
+import { MessageSquare, Bell } from 'lucide-react';
 
-export function Header() {
-  const [searchValue, setSearchValue] = useState<string>('')
-  const router = useRouter()
+export default function Header({ translucent = false }: { translucent?: boolean }) {
+  const { data: session, status } = useSession();
+  const loggedIn = status === 'authenticated';
+  
+  const pathname = usePathname();
+  const router = useRouter();
+  const isLanding = pathname === '/';
 
-  const handleSearch = () => {
-    const q = searchValue.trim();
-    if (!q) return
-    router.push(`/search/${encodeURIComponent(q)}`)
-  }
+  const [q, setQ] = useState('');
+  const search = () => q.trim() && router.push(`/search?q=${encodeURIComponent(q)}`);
+
+  const base = clsx(
+    'sticky top-0 z-50 border-b border-[var(--border-base)]',
+    translucent
+      ? 'backdrop-blur-sm bg-[var(--surface-alt)/60] dark:bg-[var(--surface-alt)/60]]'
+      : 'bg-[var(--surface-alt)] dark:bg-[var(--surface-alt)]',
+  );
 
   return (
-    <header className="sticky top-0 z-[100] flex items-center justify-between h-20 px-4 md:px-32 bg-[var(--olivy)] backdrop-blur border-b border-brand-brown-border">
-      <div className="flex items-center gap-4">
-        <IconButton icon={Menu} aria-label="Abrir menu" className="lg:hidden" />
-        <Logo size={45} className="block" />
-      </div>
+    <header className={base}>
+      <div className="container mx-auto flex items-center justify-between px-4 h-[var(--size-header)]">
+        <Button variant="logo" logoSrc="/assets/icons/logo_small.svg" logoSize={40} href="/" />
 
-      {/* Aqui estão as props exatas que o SearchBar espera: */}
-      <SearchBar
-        value={searchValue}
-        onChange={setSearchValue}
-        onSearch={handleSearch}
-      />
+        {/* Landing page */}
+        {isLanding && !loggedIn && (
+          <nav className="flex items-center gap-6">
+            <Button variant="default" onClick={() => router.push('/about')}>Sobre</Button>
+            <Button variant="default" onClick={() => router.push('/login')}>Entrar</Button>
+            <ThemeToggle />
+          </nav>
+        )}
 
-      <div className="flex items-center gap-4">
-        <IconButton icon={MessageSquare} title="Mensagens" />
-        <IconButton icon={Bell} title="Notificações" />
-        <ProfileMenu avatarSrc="/assets/images/users/diego.jpg" />
+        {/* Usuário autenticado (Em qualquer rota) */}
+        {loggedIn && (
+          <>
+            <SearchBar value={q} onChange={setQ} onSearch={search} />
+
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <Button variant="icon" icon={MessageSquare} aria-label="Mensagens" onClick={() => router.push('/messages')} />
+              <Button variant="icon" icon={Bell} aria-label="Notificações" onClick={() => router.push('/notifications')} />
+            
+              {/* Avatar + menu */}
+              <ProfileMenu
+                avatarSrc={session.user?.image ?? '/assets/icons/avatar_placeholder.svg'}
+                userName={session.user?.name ?? session.user?.email ?? 'Usuário'}
+                onLogout={() => signOut({ callbackUrl: '/' })}
+              />
+            </div>
+          </>
+        )
+
+        }
+
       </div>
     </header>
-  )
+  ) 
+
+
 }

@@ -1,11 +1,27 @@
-import { FooterLinks } from '@/src/components/layout/FooterLinks';
+import Link from 'next/link';
 
-export function Footer() {
+const items = [
+  { href: '/about', label: 'Sobre nós' },
+  { href: '/terms', label: 'Termos de uso' },
+  { href: '/privacy', label: 'Política de privacidade' },
+];
+
+export default function Footer() {
   return (
-    <footer className="flex flex-col items-center justify-center z-[100] py-10 px-4 md:px-80 bg-[var(--olive)] text-white">
-      <div className="flex items-center justify-between w-full">
-        <FooterLinks />
-        <p className="text-lg font-serif m-0">
+    <footer className="
+      bg-[var(--surface-alt)] text-[var(--text-secondary)]
+      border-t border-[var(--border-base)]
+      px-[var(--gap-md)] py-10
+    ">
+      <div className="container mx-auto flex flex-col md:flex-row gap-6 md:gap-0 justify-between items-center">
+        <nav aria-label="Rodapé" className="flex gap-8">
+          {items.map(({ href, label }) => (
+            <Link key={href} href={href} className="hover:text-[var(--text-primary)]">
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <p className="text-sm">
           © {new Date().getFullYear()} Literalis — todos os direitos reservados.
         </p>
       </div>

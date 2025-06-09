@@ -1,53 +1,40 @@
 'use client';
-import { useState } from 'react';
 
-import { Button } from '@/src/components/ui/Button';
+import { useState } from 'react';
+import { Button } from '@/src/components/ui/Buttons';
 
 export type Tab = 'discover' | 'friends';
 
-interface FeedSwitchProps {
-  onChange: (t: Tab) => void
-  className?: string
-}
-
-export function FeedSwitch({
-  onChange,
-  className = 'flex items-center gap-2 w-full my-6',
-}: FeedSwitchProps) {
+export function FeedSwitch({ onChange }: { onChange: (t: Tab) => void }) {
   const [tab, setTab] = useState<Tab>('discover');
 
-  const handle = (t: Tab) => {
+  const switchTo = (t: Tab) => {
+    if (t === tab) return;
     setTab(t);
     onChange(t);
   };
 
   return (
-    <div className={className}>
-      <div className="flex-1 h-px bg-[var(--olivy)]" aria-hidden />
+    <div className="flex items-center gap-4 my-4">
+      <div className="flex-1 h-px bg-[var(--divider)]" />
 
-      {/* Botão "Descobrir" */}
       <Button
-        variant={tab === 'discover' ? 'primary' : 'secondary'}
         size="sm"
-        className="px-4 py-2"
-        onClick={() => handle('discover')}
-        disabled={tab ==='discover'}
+        active={tab === 'discover'}
+        onClick={() => switchTo('discover')}
       >
         Descobrir
       </Button>
 
-      {/* Botão "Amigos" */}
       <Button
-        variant={tab === 'friends' ? 'primary' : 'secondary'}
         size="sm"
-        className="px-4 py-2"
-        onClick={() => handle('friends')}
-        disabled={tab === 'friends'}
+        active={tab === 'friends'}
+        onClick={() => switchTo('friends')}
       >
         Amigos
       </Button>
 
-      <div className="flex-1 h-px [var(--bg-olivy)]" aria-hidden />
+      <div className="flex-1 h-px bg-[var(--divider)]" />
     </div>
   );
 }

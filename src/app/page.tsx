@@ -1,40 +1,36 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-
-import { Button } from '@/src/components/ui/Button';
+import { Button } from '@/src/components/ui/Buttons';
 
 export default function Home() {
   return (
-    <section className='border-1 border-[var(--olive)] h-screen mx-20 flex items-center justify-evenly'>
+    <main className="flex flex-col items-center justify-center min-h-screen">
+      <section className="container mx-auto px-6 py-16 flex flex-col lg:flwx-row items-center gap-12">
+        { /* Bloco de texto e CTA */}
+        <div className="max-w-lg space-y-6 text-center lg:text-left">
+          <h1 className="text-4x1 lg:text-5x1 font-bold text-[var-(--text-primary)]">
+            Bem-vindo ao Literalis
+          </h1>
+          <p className="text-lg text-[--text-secondary]">
+            Conecte-se com outros leitores, compartilhe suas leituras e descubra novos livros.
+          </p>
+          <Link href="/feed">
+            <Button variant="default" size="lg">Acessar Feed</Button>
+          </Link>
+        </div>
 
-      <div className="border-1 border-[var(--olive)] flex flex-col items-center justify-center gap-8 text-center">
-        <div className="flex flex-row items-center gap-4">
-          <div>
-            <img src="/assets/images/main_logo.svg" alt="Literalis" />
-          </div>
+        {/* Ilustração */}
+        <div className="relative w-full max-w-md">
+          <Image
+            src="/assets/images/landing-illustration.svg"
+            alt="Ilustração de boas-vindas ao Literalis"
+            width={500}
+            height={500}
+            className="w-full h-auto"
+          />
         </div>
-        <Link href="/feed/">
-          <Button>
-            Feed
-          </Button>
-        </Link>
-      </div>
-
-      <div className="border-1 border-[var(--olive)] relative flex flex-col w-auto h-auto items-center justify-center">
-        <div className="">
-          <img src="/assets/images/top_circle.png" alt="" />
-        </div>
-        <div className="absolute top-[-25] left-0 w-55 h-55">
-          <img src="/assets/images/writing_circle.png" alt="Escrita" />
-        </div>
-        <div className="absolute bottom-0 right-0 w-60 h-60">
-          <img src="/assets/images/reading_circle.png" alt="Leitura" />
-        </div>
-        <div className="">
-          <img src="/assets/images/bottom_circle.png" alt="" />
-          <div>Conheça (vertical) </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </main>
   )
 }

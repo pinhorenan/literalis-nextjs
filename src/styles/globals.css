@@ -1,57 +1,128 @@
 @import "tailwindcss";
 
-:root {
-  --brown: #A25430;
-  --brown-light: #CFAF9D;
-  --brown-dark: #7A4B3A;
-  --olive: #5A5223;
-  --olivy: #5a52235d;
-  --offwhite: #FEFEFE;
-  --background: #ffffff;
-  --foreground: #171717;
-
-  /* --- Dimensões fixas s--- */
-  --header-h: 80px;
-  --sidebar-w: 240px;
-  
-  /* --- Raio e gaps --- */
-  --radius-sm: 5px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --gap-xs: .25rem;
-  --gap-sm: .5rem;
-  --gap-md: 1rem;
-  --gap-lg: 2rem;
-  
-  /* --- Breakpoints --- */
-  --bp-lg: 1300px;
-  --bp-md: 768px;
-  --bp-sm: 576px;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  scroll-behavior: smooth;
-}
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-body {
-  display: flex; flex-direction: column;
-  background: var(--offwhite); color: #333;
-  font-family: Arial, Helvetica, sans-serif;
+html, body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* - Light Mode - */
+:root {
+  /* - Marca - */
+  --color-primary: #5a5223; /* Olive */
+  --color-primary-light: #7a6c4b;
+  --color-primary-dark: #3e3a1c;
+
+  --color-seondary: #a25430;
+  --color-secondary-light: #c17b55;
+  --color-secondary-dark: #7a3f1f;
+
+  --color-accent: #d4b483;
+
+  /* - Neutros - */
+  --neutral-100: #faf9f6;
+  --neutral-200: #f0efe9;
+  --neutral-300: #e0dfd9; 
+  --neutral-400: #c8c6be;
+  --neutral-500: #a8a59d;
+  --neutral-600: #76736b;
+  --neutral-700: #4f4c47;
+  --neutral-800: #2a2826;
+  --neutral-900: #1a1a1a;
+
+  /* - Semânticas - */
+  --color-success:  #3d9970;
+  --color-info:     #007acc;
+  --color-warning:  #ff851b;
+  --colordanger:    #c0392b;
+
+  /* - Surfaces / Elevações - */
+  --surface-bg: var(--neutral-100);
+  --surface-card: var(--neutral-200);
+  --surface-card-hover: var(--neutral-300);
+  --surface-input: var(--neutral-100);
+  --surface-popover: var(--neutral-250, #f5f4f0);
+  --surface-alt: var(--neutral-200);
+  --surface-elevated: var(--neutral-300);
+  --surface-modal: var(--neutral-400);
+
+  --overlay-light: rgba(0,0,0, 0.03);
+  --overlay-dark: rgba(0,0,0, 0.5);
+
+  /* - Texto - */
+  --text-primary: var(--neutral-900);
+  --text-secondary: var(--neutral-700);
+  --text-tertiary: var(--neutral-500);
+  --text-link: var(--color-primary);
+
+  /* - Bordas - */
+  --border-base: var(--neutral-300);
+  --bordr-subtle: var(--neutral-200);
+  --border-strong: var(--neutral-400);
+  --divider: var(--neutral-250, #eceae3);
+
+  /* - Sombras - */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* - Tipografia, espaçamentos, etc. - */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --size-header: 60px;
+  --size-sidebar: 300px;
+  
+  --radius-sm: 0.3125rem; /* 5px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.625rem;  /* 10px */
+
+  --gap-xs: 0.25rem; /* 4px */
+  --gap-sm: 0.5rem;  /* 8px */
+  --gap-md: 1rem;   /* 16px */
+  --gap-lg: 2rem;   /* 32px */
+
+  --bp-sm: 576px; /* Small devices */
+  --bp-md: 768px; /* Medium devices */
+  --bp-lg: 1300px; /* Large devices */
+}
+
+/* - Dark Mode - */
+.dark,
+[data-theme="dark"] {
+  /* Inverte neutras - */
+  --surface-bg:       var(--neutral-900);
+  --surface-card:     var(--neutral-800);
+  --surface-card-hover: var(--neutral-700);
+  --surface-input:    var(--neutral-900);
+  --surface-popover:  var(--neutral-850, #1f1f1f);
+  --surface-alt:      var(--neutral-800);
+  --surface-elevated: var(--neutral-700);
+  --surface-modal:    var(--neutral-600);
+
+  --overlay-light: rgba(255,255,255, 0.03);
+  --overlay-dark: rgba(255,255,255, 0.2);
+
+  /* - Texto claro - */
+  --text-primary: var(--neutral-100);
+  --text-secondary: var(--neutral-300);
+  --text-tertiary: var(--neutral-500);
+  --text-link: var(--color-primary-light);
+
+  /* - Bordas - */
+  --border-base: var(--neutral-700);
+  --bordr-subtle: var(--neutral-800);
+  --border-strong: var(--neutral-600);
+  --divider: var(--neutral-750, #2c2c28);
+
+  /* Sombras (mais sutis no escuro) - */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
 }

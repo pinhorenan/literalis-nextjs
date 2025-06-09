@@ -1,67 +1,96 @@
-// app/api/posts/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/src/lib/prisma';
+import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { z } from 'zod'
+import { db } from '@/src/server/db'
+import { json, badRequest, serverError, unauthorized } from '@/src/server/http'
+import { authOptions } from '@/src/server/auth'
 
-// GET /api/posts?feed=friends&userId=123
-export async function GET(request: NextRequest) {
+const PostInput = z.object({
+  bookIsbn:    z.string(),
+  excerpt:     z.string(),
+  progressPct: z.number().int().min(0).max(100),
+})
+
+/* ───────────── GET /api/posts ───────────── */
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const feed = searchParams.get('feed') ?? 'discover';
-    const user = searchParams.get('userId');
+    const { searchParams } = new URL(req.url)
 
-    const where =
-      feed === 'friends' && user
-        ? { author: { followers: { some: { followerId: user } } } }
-        : {};
+    const authorId   = searchParams.get('authorId') ?? undefined
+    const bookIsbn   = searchParams.get('bookIsbn')   ?? undefined
+    const onlyFriends = searchParams.get('friends') === '1'
 
-    const posts = await prisma.post.findMany({
+    const take   = Number(searchParams.get('take')   ?? '20')
+    const cursor = searchParams.get('cursor') ?? undefined
+
+    const where: any = {
+      ...(authorId && { authorId }),
+      ...(bookIsbn && { bookIsbn }),
+    }
+
+    if (onlyFriends) {
+      const session = await getServerSession(authOptions)
+      if (session) {
+        where.author = {
+          followers: { some: { followerId: session.user.id } },
+        }
+      }
+    }
+
+    const posts = await db.post.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      take,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
       include: {
-        author: true,
-        book: true,
+        author:   true,
+        book:     true,
         comments: { include: { author: true } },
+        // agora traz também a contagem de comentários
+        _count: {
+          select: {
+            reactions: true,
+            comments:  true,
+          },
+        },
       },
-    });
+    })
 
-    return NextResponse.json(posts);
-  } catch (error: any) {
-    console.error('GET /api/posts error:', error);
-    return NextResponse.json({ error: 'Erro ao buscar posts.' }, { status: 500 });
+    return json(posts)
+
+  } catch (e) {
+    console.error(e)
+    return serverError()
   }
 }
 
-// POST /api/posts
-export async function POST(request: NextRequest) {
+/* ───────────── POST /api/posts ───────────── */
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const session = await getServerSession(authOptions)
+    if (!session) return unauthorized()
 
-    // Validações básicas
-    if (
-      typeof body.authorId    !== 'string' ||
-      typeof body.bookIsbn    !== 'string' ||
-      typeof body.excerpt     !== 'string' ||
-      typeof body.progressPct !== 'number'
-    ) {
-      return NextResponse.json(
-        { error: 'authorId, bookIsbn, excerpt e progressPct são obrigatórios.' },
-        { status: 400 }
-      );
-    }
+    const body = PostInput.parse(await req.json())
 
-    const post = await prisma.post.create({
-      data: {
-        authorId:     body.authorId,
-        bookIsbn:     body.bookIsbn,
-        excerpt:      body.excerpt,
-        progressPct:  body.progressPct,
+    const post = await db.post.create({
+      data: { ...body, authorId: session.user.id },
+      include: {
+        author:   true,
+        book:     true,
+        // opcional: já incluir _count no retorno de criação também
+        _count: {
+          select: {
+            reactions: true,
+            comments:  true,
+          },
+        },
       },
-      include: { author: true, book: true, comments: { include: { author: true } } },
-    });
+    })
 
-    return NextResponse.json(post, { status: 201 });
-  } catch (error: any) {
-    console.error('POST /api/posts error:', error);
-    return NextResponse.json({ error: 'Erro ao criar post.' }, { status: 500 });
+    return json(post, 201)
+  } catch (e: any) {
+    if (e instanceof z.ZodError) return badRequest(e.message)
+    console.error(e)
+    return serverError()
   }
 }

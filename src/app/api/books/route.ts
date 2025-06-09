@@ -1,121 +1,61 @@
-// app/api/books/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/src/lib/prisma';
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
+import { db } from '@/src/server/db'
+import { json, conflict, badRequest, serverError } from '@/src/server/http'
+
+const BookInput = z.object({
+  isbn:            z.string().min(5),
+  title:           z.string(),
+  author:          z.string(),
+  publisher:       z.string(),
+  edition:         z.number().int().gte(1),
+  pages:           z.number().int().gte(1),
+  language:        z.string(),
+  publicationDate: z.coerce.date(),
+  coverPath:       z.string(),
+})
 
 /**
- * GET /api/books?isbn=1234567890
- * Se houver query 'isbn', devolve só o livro com aquele ISBN.
- * Senão, devolve todos os livros.
+ * GET /api/books
+ * Retorna diretamente um array de Book[]
  */
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const isbn = searchParams.get('isbn');
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const take   = Number(searchParams.get('take')  ?? '20')
+    const cursor = searchParams.get('cursor') ?? undefined
 
-        let books;
-        if (isbn) {
-            // Busca um único livro por ISBN
-            const book = await prisma.book.findUnique({
-                where: { isbn },
-            });
-            if (!book) {
-                return NextResponse.json(
-                    { error: `Livro com ISBN "${isbn}" não encontrado.` },
-                    { status: 404 }
-                );
-            }
-            books = book;
-        } else {
-            // Busca todos os livros
-            books = await prisma.book.findMany({
-                orderBy: { title: 'asc' },
-            });
-        }
+    const books = await db.book.findMany({
+      orderBy: { title: 'asc' },
+      take,
+      ...(cursor && { skip: 1, cursor: { isbn: cursor } }),
+    })
 
-        return NextResponse.json(books, { status: 200 });
-    }   catch (error: any) {
-        console.error('GET /api/books error:', error);
-        return NextResponse.json(
-            { error: 'Erro ao buscar livros.' },
-            { status: 500 }
-        );
-    }
+    // **Aqui retornamos diretamente o array**, não um objeto { data, nextCursor }
+    return json(books)
+  } catch (e) {
+    console.error(e)
+    return serverError()
+  }
 }
 
 /**
  * POST /api/books
- * Body JSON esperado:
- * {
- * "isbn": "1234567890",
- * "title": "Título do Livro",
- * "author": "Autor do Livro",
- * "publisher": "Editora do Livro",
- * "edition": 1,
- * "pages": 300,
- * "language": "Português",
- * "publicationDate": "2023-01-01",
- * "coverPath": "/path/to/cover.jpg",
- * }
+ * Cria um novo livro e devolve o objeto criado
  */
-export async function POST(request: NextRequest) {
-    try {
-        const data = await request.json();
+export async function POST(req: NextRequest) {
+  try {
+    const data = BookInput.parse(await req.json())
 
-        // Validações básicas
-        if (
-            typeof data.isbn            !== 'string' ||
-            typeof data.title           !== 'string' ||
-            typeof data.author          !== 'string' ||
-            typeof data.publisher       !== 'string' ||
-            typeof data.edition         !== 'number' ||
-            typeof data.pages           !== 'number' ||
-            typeof data.language        !== 'string' ||
-            typeof data.publicationDate !== 'string' ||
-            typeof data.coverPath       !== 'string'
-        ) {
-            return NextResponse.json(
-                { error: 'Todos os campos são obrigatórios.' },
-                { status: 400 }
-            );
-        }
+    const book = await db.book.create({ data })
 
-        // Converte a data de publicação para Date
-        const publicationDate = new Date(data.publicationDate);
-        if (isNaN(publicationDate.getTime())) {
-            return NextResponse.json(
-                { error: 'publicationDate inválido (deve ser ISO-8601).' },
-                { status: 400 }
-            );
-        }
+    return json(book, 201)
+  } catch (e: any) {
+    // Unique constraint violation: ISBN já existe
+    if (e.code === 'P2002')      return conflict('ISBN já cadastrado')
+    if (e instanceof z.ZodError) return badRequest(e.message)
 
-        // Cria o livro no banco
-        const newBook = await prisma.book.create({
-            data: {
-                isbn:               data.isbn,
-                title:              data.title,
-                author:             data.author,
-                publisher:          data.publisher,
-                edition:            data.edition,
-                pages:              data.pages,
-                language:           data.language,
-                publicationDate:    publicationDate,
-                coverPath:          data.coverPath,
-            },
-        });
-
-        return NextResponse.json(newBook, { status: 201 });
-    }   catch (error: any) {
-        console.error('POST /api/books error:', error);
-        // Caso ultra violação de unique (por ex., ISBN duplicado)
-        if (error.code === 'P2002') {
-            return NextResponse.json(
-                { error: 'ISBN já cadastrado.' },
-                { status: 409 }
-            );
-        }
-        return NextResponse.json(
-            { error: 'Erro ao criar livro.' },
-            { status: 500 }
-        );
-    }
+    console.error(e)
+    return serverError()
+  }
 }

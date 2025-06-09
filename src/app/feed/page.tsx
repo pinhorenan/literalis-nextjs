@@ -1,62 +1,84 @@
+// src/app/feed/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import PostCard from '@/src/components/feed/PostCard';
+import { useEffect, useState } from 'react';
+import Sidebar from '@/src/components/layout/Sidebar';
+import PostCard, { PostWithRelations, CommentWithAuthor } from '@/src/components/feed/PostCard';
 
-import type { Post, User, Book, Comment } from '@prisma/client';
-
-type CommentWithAuthor = Comment & { author: User };
-type PostWithRelations = Post & {
-  author: User;
-  book:   Book;
-  comments: CommentWithAuthor[];
-};
-
-export default function FeedPage() {
+export default function PageFeed() {
   const [posts, setPosts] = useState<PostWithRelations[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // busca única
+  // carrega posts
   useEffect(() => {
-    fetch('/api/posts')
-      .then(resp => resp.json())
-      .then(setPosts)
-      .catch(console.error);
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/posts');
+        if (!res.ok) throw new Error('Erro ao carregar posts');
+        const data: PostWithRelations[] = await res.json();
+        setPosts(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  async function addCommentToPost(postId: string, authorId: string, text: string) {
+  // adiciona comentário e incrementa commentsCount localmente
+  const handleAddComment = async (postId: string, text: string) => {
     try {
-      const resp = await fetch('/api/comments', {
-        method: "POST",
+      const res = await fetch(`/api/posts/${postId}/comments`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, authorId, text }),
+        body: JSON.stringify({ text }),
       });
-      if (!resp.ok) throw new Error('Falha ao enviar comentário');
-      const newComment: CommentWithAuthor = await resp.json();
-
-      // atualiza o estado local
+      if (!res.ok) throw new Error('Falha ao enviar comentário');
+      const newComment: CommentWithAuthor = await res.json();
       setPosts(prev =>
         prev.map(p =>
-          p.id === postId ? { ...p, comments: [newComment, ...p.comments] } : p
+          p.id === postId
+            ? {
+                ...p,
+                comments: [...p.comments, newComment],
+                commentsCount: p.commentsCount + 1,
+              }
+            : p
         )
       );
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
 
-  // render
   return (
-    <div className="flex flex-col gap-6 p-4">
-      {posts.map(post => (
-        <PostCard
-          key={post.id}
-          post={post}
-          author={post.author}
-          book={post.book}
-          comments={post.comments}
-          onAddComment={txt => addCommentToPost(post.id, post.author.id, txt)}
-        />
-      ))}
-    </div>
-  )
+    <section className="flex gap-4">
+      {/* Sidebar principal */}
+      <Sidebar variant="main" />
+
+      {/* Feed */}
+      <main className="flex-1 px-4 py-6 space-y-6">
+        {loading ? (
+          <p className="text-center">Carregando feed…</p>
+        ) : posts.length === 0 ? (
+          <p className="text-center text-[var(--text-tertiary)]">
+            Não há posts para mostrar.
+          </p>
+        ) : (
+          posts.map(post => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onAddComment={handleAddComment}
+            />
+          ))
+        )}
+      </main>
+
+      {/* Sidebar de recomendados */}
+      <Sidebar variant="recommended" />
+    </section>
+  );
 }
