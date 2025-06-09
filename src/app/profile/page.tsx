@@ -9,8 +9,8 @@ export default async function MyProfilePage() {
   if (!session?.user?.id) return notFound();
 
   // busca perfil e posts via o mesmo endpoint
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${session.user.id}`, {
-    next: { revalidate: 60 },
+  const res = await fetch(`/api/users/${session.user.id}`, {
+  next: { revalidate: 60 },
   });
   if (!res.ok) return notFound();
 

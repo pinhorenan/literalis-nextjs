@@ -97,13 +97,13 @@ export default function PostCard({ post, onAddComment }: Props) {
    *  RENDER
    * ------------------------------------------------------------ */
   return (
-    <article className="bg-[var(--surface-card)] rounded-lg shadow-sm overflow-hidden mx-2 md:mx-4">
+    <article className="bg-[var(--surface-card)] rounded-lg shadow-sm overflow-hidden mx-40 gap-10">
       {/* HEADER: autor + follow */}
       <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <Link href={`/profile/${post.author.id}`}>
             <Image
-              src={post.author.avatarPath || '/assets/avatar_placeholder.svg'}
+              src={post.author.avatarPath || '/assets/images/users/default.jpg'}
               alt={post.author.name}
               width={40}
               height={40}

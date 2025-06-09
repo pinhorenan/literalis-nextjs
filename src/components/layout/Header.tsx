@@ -54,7 +54,7 @@ export default function Header({ translucent = false }: { translucent?: boolean 
             
               {/* Avatar + menu */}
               <ProfileMenu
-                avatarSrc={session.user?.image ?? '/assets/icons/avatar_placeholder.svg'}
+                avatarSrc={session.user?.image ?? '/assets/images/users/default.jpg'}
                 userName={session.user?.name ?? session.user?.email ?? 'Usuário'}
                 onLogout={() => signOut({ callbackUrl: '/' })}
               />

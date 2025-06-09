@@ -1,13 +1,24 @@
+// src/components/layout/Sidebar.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import clsx from 'clsx';
 import { useSession } from 'next-auth/react';
 
 import { Button } from '@/src/components/ui/Buttons';
-import { User, Globe, BookOpen, ChevronLeft, ChevronRight, Settings, Users } from 'lucide-react';
-import type { Book } from '@prisma/client';
+import {
+  User,
+  Globe,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  Users,
+  Plus,
+} from 'lucide-react';
+import type { Book, User as PrismaUser } from '@prisma/client';
 
 interface Props {
   variant: 'main' | 'recommended';
@@ -20,38 +31,47 @@ interface Props {
 
 export default function Sidebar(props: Props) {
   const { data: session } = useSession();
-  const userName = session?.user?.name ?? session?.user?.email ?? 'Visitante';
+  const me = session?.user;
+  const userName = me?.name ?? me?.email ?? 'Visitante';
 
   /* ───────── Navegação principal ───────── */
   const mainNav = [
-    { label: 'Perfil',         icon: User,      href: '/profile' },
-    { label: 'Estante',        icon: BookOpen,  href: '/shelf' },
-    { label: 'Explorar',       icon: Globe,     href: '/' },
-    { label: 'Amigos',         icon: Users,     href: '/friends' },
-    { label: 'Configurações',  icon: Settings,  href: '/preferences' },
+    { label: 'Perfil',        icon: User,     href: '/profile' },
+    { label: 'Estante',       icon: BookOpen, href: '/shelf' },
+    { label: 'Explorar',      icon: Globe,    href: '/' },
+    { label: 'Amigos',        icon: Users,    href: '/friends' },
+    { label: 'Configurações', icon: Settings, href: '/preferences' },
   ];
 
-  /* ───────── Recomendados (quando variant==='recommended') ───────── */
+  /* ───────── Recomendados ───────── */
   const [books, setBooks] = useState<Book[]>([]);
-  const [load,  setLoad]  = useState(false);
+  const [people, setPeople] = useState<PrismaUser[]>([]);
+  const [loadingBooks, setLoadingBooks] = useState(false);
+  const [loadingPeople, setLoadingPeople] = useState(false);
 
   useEffect(() => {
-    if (props.variant === 'recommended') {
-      setLoad(true);
-      fetch('/api/books')
-        .then(r => r.json())
-        .then(setBooks)
-        .finally(() => setLoad(false));
-    }
+    if (props.variant !== 'recommended') return;
+
+    setLoadingPeople(true);
+    fetch('/api/users?limit=5')
+      .then(r => r.json())
+      .then(setPeople)
+      .finally(() => setLoadingPeople(false));
+
+    setLoadingBooks(true);
+    fetch('/api/books?limit=5')
+      .then(r => r.json())
+      .then(setBooks)
+      .finally(() => setLoadingBooks(false));
   }, [props.variant]);
 
-  /* ───────── Colapso da sidebar ───────── */
+  /* ───────── Colapso ───────── */
   const [collapsed, setCollapsed] = useState(false);
   const isMain = props.variant === 'main';
 
   const asideCls = clsx(
     'sticky top-[var(--size-header)] flex-shrink-0 transition-transform duration-300',
-    'h-[calc(100vh_-_var(--size-header))] w-max-[var(--size-sidebar)]',
+    'h-[calc(100vh_-_var(--size-header))] w-64',          // força mesma largura
     'shadow-md overflow-auto p-4 space-y-6',
     'bg-[var(--surface-alt)] border-[var(--border-base)]',
     isMain ? 'border-r' : 'border-l',
@@ -59,117 +79,134 @@ export default function Sidebar(props: Props) {
   );
 
   const Arrow = collapsed
-    ? (isMain ? ChevronRight : ChevronLeft)
-    : (isMain ? ChevronLeft : ChevronRight);
+    ? isMain ? ChevronRight : ChevronLeft
+    : isMain ? ChevronLeft : ChevronRight;
 
   return (
     <aside className={asideCls}>
-      {/* Botão de colapso */}
+      {/* Colapse toggle */}
       <div className={clsx('absolute top-2', isMain ? 'right-2' : 'left-2')}>
         <Button
           variant="icon"
+          size="sm"
           icon={Arrow}
           onClick={() => setCollapsed(!collapsed)}
-          className="hover:bg-[var(--surface-card)] transition rounded-full"
+          className="hover:bg-[var(--surface-card)] rounded-full"
         />
       </div>
 
-      {/* -------- Sidebar principal -------- */}
-      {isMain && (
+      {/* ===== MAIN ===== */}
+      {isMain && !collapsed && (
         <>
-          {!collapsed && (
-            <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">
-              Olá, {userName.split(' ')[0]}!
-            </h2>
-          )}
-
+          <h2 className="text-xl font-semibold mb-4">
+            Olá, {userName.split(' ')[0]}!
+          </h2>
           <nav className="flex flex-col gap-3">
             {mainNav.map(({ label, icon: Icon, href }) => (
-              <Link key={label} href={href} className="justify-end flex">
+              <Link key={label} href={href} className="flex">
                 <Button
                   variant="default"
-                  className=" border-0 bg-transparent hover:bg-[var(--surface-card-hover)] gap-2 transition rounded-lg"
+                  className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-2 rounded-lg"
                 >
-                  {!collapsed && label}
                   <Icon size={24} />
+                  <span>{label}</span>
                 </Button>
               </Link>
             ))}
           </nav>
-
-          {/* Progresso recente do livro */}
-          { !collapsed && (
-            <section className="mt-6 space-y-3">
-              <h3 className="text-sm font-medium text-[var(--text-secondary)]">
-                Progresso Recente
-              </h3>
-
-          {props.recentBookCover && (
-              <img
-                src={props.recentBookCover}
-                alt="Capa do livro"
-                className="w-full rounded-lg border border-[var(--border-subtle)]"
-              />
-          )}
-
-              {props.recentBookPagesRead != null && props.recentBookTotalPages && (
-                <>
-                  <div className="w-full h-2 rounded-full bg-[var(--surface-card)] overflow-hidden">
-                    <div
-                      className="h-full bg-[var(--color-primary)] transition-width duration-500"
-                      style={{
-                        width: `${(props.recentBookPagesRead / props.recentBookTotalPages) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-[var(--text-tertiary)]">
-                    {props.recentBookPagesRead}/{props.recentBookTotalPages} páginas
-                  </p>
-                </>
-              )}
-
-              <Button
-                variant="default"
-                size="sm"
-                className="w-full justify-center hover:bg-[var(--surface-card)] transition rounded-lg"
-                onClick={props.onNewBook}
-              >
-                <BookOpen size={16} /> {!collapsed && 'Novo Livro'}
-              </Button>
-            </section>
-          )}
+          {/* … restante do bloco MAIN … */}
         </>
       )}
 
-      {/* -------- Sidebar de recomendados -------- */}
+      {/* ===== RECOMMENDED ===== */}
       {props.variant === 'recommended' && (
         <>
+          {/* bloco 1: perfil */}
           {!collapsed && (
-            <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">
-              Recomendados
-            </h2>
+            <div className="flex items-center gap-3">
+              <Image
+                src={me?.image ?? '/assets/images/users/default.jpg'}
+                alt={userName}
+                width={48}
+                height={48}
+                className="rounded-full border"
+              />
+              <div>
+                <p className="font-medium">{userName}</p>
+                {me?.email && (
+                  <p className="text-xs text-[var(--text-tertiary)]">
+                    {me.email}
+                  </p>
+                )}
+              </div>
+            </div>
           )}
 
-          {load && <p className="text-sm">Carregando...</p>}
-          {!load && !books.length && (
-            <p className="text-sm text-[var(--text-tertiary)]">
-              Nenhum livro recomendado no momento.
-            </p>
+          <hr className="border-[var(--border-subtle)]" />
+
+          {/* bloco 2: perfis recomendados */}
+          {!collapsed && (
+            <>
+              <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                Perfis recomendados
+              </h3>
+              {loadingPeople && <p className="text-sm">Carregando…</p>}
+              <ul className="space-y-3">
+                {people.map(p => (
+                  <li key={p.id} className="group">
+                    <Link href={`/profile/${p.id}`} className="flex items-center gap-2">
+                      <Image
+                        src={p.avatarPath || '/assets/avatar_placeholder.svg'}
+                        alt={p.name}
+                        width={32}
+                        height={32}
+                        className="rounded-full border"
+                      />
+                      <span className="text-sm truncate group-hover:underline">
+                        {p.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
 
-          <ul className="space-y-3">
+          <hr className="border-[var(--border-subtle)]" />
+
+          {/* bloco 3: livros recomendados (apenas capa + hover) */}
+          {!collapsed && (
+            <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-2">
+              Livros recomendados
+            </h3>
+          )}
+          {loadingBooks && <p className="text-sm">Carregando…</p>}
+          <ul className="flex flex-col items-center space-y-4">
             {books.map(book => (
-              <li key={book.isbn} className="group hover:bg-[var(--surface-card)] transition rounded-lg p-1">
-                <Link href={`/book/${book.isbn}`} className="flex items-center gap-3">
-                  <img
-                    src={book.coverPath}
-                    alt={book.title}
-                    className="w-10 h-14 object-cover rounded"
-                  />
-                  {!collapsed && (
-                    <span className="text-sm group-hover:underline">{book.title}</span>
-                  )}
-                </Link>
+              <li key={book.isbn} className="relative group">
+                <Image
+                  src={book.coverPath}
+                  alt={book.title}
+                  width={80}
+                  height={120}
+                  className="
+                    rounded object-cover transition-shadow
+                    group-hover:shadow-lg
+                    max-h-[200px]
+                  "
+                />
+                <Button
+                  variant="icon"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => {
+                    /* chamar API para adicionar à estante */
+                  }}
+                  className="
+                    absolute bottom-1 right-1 
+                    hidden group-hover:block
+                  "
+                />
               </li>
             ))}
           </ul>
