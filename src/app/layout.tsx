@@ -27,8 +27,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen min-w-screen font-sans antialiased bg-[var(--surface-base)] text-[var(--text-primary)]">
         <Providers session={session}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Header variant={session ? 'feed' : 'landing'} />
-            <div className="pt-[var(--size-header)] h-[100vh_-_var(--size-footer)] bg-[var(--surface-bg)]">
+            {/* <Header variant={session ? 'feed' : 'landing'} /> */}
+            <div className="bg-[var(--surface-bg)">
               {children}
             </div>
           </ThemeProvider>

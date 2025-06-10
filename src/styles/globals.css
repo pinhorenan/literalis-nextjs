@@ -64,8 +64,8 @@ html, body {
   --text-link: var(--color-primary);
 
   /* - Bordas - */
-  --border-base: var(--neutral-300);
   --bordr-subtle: var(--neutral-200);
+  --border-base: var(--neutral-300);
   --border-strong: var(--neutral-400);
   --divider: var(--neutral-250, #eceae3);
 
@@ -79,7 +79,7 @@ html, body {
 
   --size-header: 4rem;
   --size-sidebar: 16rem;
-  --size-footer: 10rem
+  --size-footer: 10rem;
   
   --radius-sm: 0.3125rem; /* 5px */
   --radius-md: 0.5rem;    /* 8px */
@@ -118,9 +118,9 @@ html, body {
   --text-link: var(--color-primary-light);
 
   /* - Bordas - */
+  --border-subtle: var(--neutral-600);
   --border-base: var(--neutral-700);
-  --bordr-subtle: var(--neutral-800);
-  --border-strong: var(--neutral-600);
+  --border-strong: var(--neutral-800);
   --divider: var(--neutral-750, #2c2c28);
 
   /* Sombras (mais sutis no escuro) - */

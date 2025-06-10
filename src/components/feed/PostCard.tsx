@@ -45,7 +45,7 @@ export default function PostCard({ post, onAddComment }: Props) {
   const [draft, setDraft] = useState<string>('');
   const [showAllComments, setShowAllComments] = useState(false);
   
-  const displayedComments = showAllComments ? post.comments : post.comments.slice(0, 2);
+  const displayedComments = showAllComments ? post.comments : post.comments.slice(0, 3);
 
   /* ------------------------------------------------------------
    *  SYNC LIKE / FOLLOW STATUS
@@ -100,41 +100,35 @@ export default function PostCard({ post, onAddComment }: Props) {
   };
 
   return (
-    <article className="bg-[var(--surface-alt)] rounded-lg overflow-hidden max-w-[700px] shadow-sm border border-[var(--border-base)]">
+    <article className=" overflow-hidden max-w-[700px] border-b border-[var(--border-base)]">
       <div className="flex flex-col md:flex-row p-4">
         {/* esquerda(2/3) -> livro */}
-        <div className="flex flex-row gap-4 basis-4/7">
+        <div className="flex flex-row gap-4 basis-4/7 border-r border-[var(--border-base)]" >
           {/* capa do livro */}
           <Image src={post.book.coverPath} alt={`Capa: ${post.book.title}`} width={120} height={180} className="rounded object-cover border" />
           {/* detalhes do livro */}
-          <div className="flex flex-col justify-between">
-            <div>
+          <div className="flex flex-col">
               <h2 className="text-lg font-semibold">{post.book.title}</h2>
-              <p className="text-sm text-[var(--text-secondary)]">por {post.book.author}</p>
-              <p className="text-xs text-[var(--text-tertiary)]">
+              <p className="text-md text-[var(--text-secondary)]">por {post.book.author}</p>
+            <div className="mt-2 space-y-2">
+              <p className="text-sm text-[var(--text-tertiary)]">
                 {post.book.publisher}, ed. {post.book.edition}
               </p>
-              <p className="text-xs text-[var(--text-tertiary)]">
+              <p className="text-sm text-[var(--text-tertiary)]">
                 {post.book.pages} páginas • {post.book.language}
               </p>
-              <p className="text-xs text-[var(--text-tertiary)]">
+              <p className="text-sm text-[var(--text-tertiary)]">
                 Publicado em {new Date(post.book.publicationDate).toLocaleDateString()}
               </p>
-            </div>
-            <div>
-              <p className="text-sm mb-1">{post.progressPct}% lido</p>
-              <div className="h-1 bg-[var(--surface-alt)] rounded overflow-hidden">
-                <div
-                  className="h-full bg-[var(--color-primary)]"
-                  style={{ width: `${post.progressPct}%` }}
-                />
-              </div>
+              <p className="text-sm text-[var(--text-tertiary)]">
+                <strong>ISBN:</strong> {post.book.isbn}
+              </p>
             </div>
           </div>
         </div>
 
         {/* direita(1/3) -> post */}
-        <div className="flex flex-col basis-3/7">
+        <div className="flex flex-col basis-3/7 ml-4">
           {/* cabeçalho com autor e data */}
           <header className="flex items-center justify-between pb-4">
             <div className="flex items-center gap-3">
@@ -162,27 +156,33 @@ export default function PostCard({ post, onAddComment }: Props) {
               </Button>
             )}
           </header>
+
           <p className="text-sm">{post.excerpt}</p>
+
+          <div className="mt-auto">
+              <div className="flex flex-1 flex-row items-center gap-2">
+                <div className="flex-1 w-full h-4 bg-[var(--color-secondary)] dark:bg-[var(--neutral-600)] border border-[var(--border-base)] rounded overflow-hidden">
+                  <div
+                    className="h-full bg-[var(--color-primary)] dark:bg-[var(--neutral-400)]"
+                    style={{ width: `${post.progressPct}%` }}
+                  />
+                </div>
+                <strong className="text-sm">{post.progressPct}% lido</strong>
+              </div>
+            </div>
         </div>
       </div>
 
       {/* IMAGE */}
       {/* reacts + input comentário */}
-        <div className="flex items-center gap-4 p-2">
+        <div className="flex items-center border-y border-[var(--border-base)] gap-4 px-4 py-2">
           <button onClick={toggleLike} className="flex items-center gap-1">
-            <Heart
-              className={clsx('cursor-pointer transition-colors', liked && 'text-red-500 fill-current')}
-            />
+            <Heart className={clsx('cursor-pointer transition-colors', liked && '[var(--text-primary)] fill-current')} />
             <span>{likeCount}</span>
           </button>
 
-          <button
-            onClick={handleComment}
-            className="flex items-center gap-1 disabled:opacity-40"
-            disabled={!draft.trim()}
-            title="Enviar comentário"
-          >
-            <MessageCircle />
+          <button onClick={handleComment} className="flex items-center gap-1 " title="Enviar comentário">
+            <MessageCircle/>
             <span>{post.commentsCount}</span>
           </button>
 
@@ -193,30 +193,30 @@ export default function PostCard({ post, onAddComment }: Props) {
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleComment()}
-            className="flex-1 border rounded p-2"
+            className="flex-1 border border-[var(--border-subtle)] rounded-md py-1 px-2"
           />
         </div>
 
       {/* COMMENTS + LIKE / SEND */}
-      <div className="p-4 space-y-4 border-t border-[var(--border-base)]">
+      <div className="px-4 py-2 space-y-3">
         {displayedComments.length ? (
           displayedComments.map(c => (
-            <div key={c.id} className="flex items-start gap-3">
+            <div key={c.id} className="flex items-center gap-2">
               <Image
                 src={c.author.avatarPath || '/assets/avatar_placeholder.svg'}
                 alt={c.author.name}
-                width={32}
-                height={32}
+                width={26}
+                height={26}
                 className="rounded-full"
               />
               <div className="flex-1">
                 <p className="text-sm">
-                  <strong>{c.author.name}</strong> {c.text}
+                  <strong>{c.author.name}:</strong> {c.text} 
                 </p>
-                <time className="text-xs text-[var(--text-tertiary)]">
-                  {relativeTime(c.createdAt)}
-                </time>
               </div>
+              <time className="relative right-0 text-xs text-[var(--text-tertiary)]">
+                    {relativeTime(c.createdAt)}
+                  </time>
             </div>
           ))
         ) : (
@@ -227,10 +227,19 @@ export default function PostCard({ post, onAddComment }: Props) {
 
         {post.comments.length > 2 && !showAllComments && (
           <button
-            className="text-sm text-[var(--color-primary)] hover:underline block text-left mx-auto"
+            className="text-sm text-[var(--text-primary)] hover:cursor-pointer hover:underline block text-left mx-auto"
             onClick={() => setShowAllComments(true)}
           >
-            Ver mais comentários ({post.comments.length - 2})
+            <strong>Ver mais comentários ({post.comments.length - 3})</strong>
+          </button>
+        )}
+
+        {showAllComments && (
+          <button
+            className="text-sm text-[var(--text-primary)] hover:cursor-pointer hover:underline block text-left mx-auto"
+            onClick={() => setShowAllComments(false)}
+          >
+            <strong>Exibir menos</strong>
           </button>
         )}
       </div>

@@ -33,7 +33,7 @@ export default function Header({
   const baseClasses = clsx(
     'fixed top-0 z-50 w-screen',
     'border-b border-[var(--border-base)]',
-    'bg-[var(--surface-alt)] dark:bg-[var(--surface-alt)]'
+    'bg-[var(--surface-alt)]'
   );
 
   const logo = ( <Button variant="logo" logoSrc="/assets/icons/logo_small.svg" logoSize={40} href="/" /> );
@@ -42,7 +42,7 @@ export default function Header({
   // 1) Landing (não autenticado)
   // -------------------------
   const LandingNav = () => (
-    <nav className="flex items-center gap-6">
+    <nav className="flex items-center gap-6 border border-red-500">
       <Button variant="default" onClick={() => router.push('/about')}>
         Sobre
       </Button>
@@ -60,7 +60,7 @@ export default function Header({
   // 2) Feed (usuário autenticado)
   // -------------------------
   const FeedNav = () => (
-    <div className="flex items-center gap-4 mx-[var(--size-sidebar)]">
+    <div className="flex items-center gap-4 mx-[var(--size-sidebar)] border border-red-500">
       <ThemeToggle />
       <Button
         variant="icon"

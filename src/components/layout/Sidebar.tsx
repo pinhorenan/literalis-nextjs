@@ -1,7 +1,7 @@
 // components/layout/Sidebar.tsx
 'use client';
 
-import { User, Globe, BookOpen, Settings, Users, Plus } from 'lucide-react';
+import { User, Globe, BookOpen, Settings, Users, MessageSquare, Bell, Plus } from 'lucide-react';
 import { useEffect, useState, ReactNode }               from 'react';
 import { useSession }                                   from 'next-auth/react';
 import { Button }                                       from '@components/ui/Buttons';
@@ -22,12 +22,12 @@ function SidebarShell({ isMain, children }: SidebarShellProps) {
     <aside className="relative flex-shrink-0 w-[var(--size-sidebar)]">
       <div
         className={clsx(
-          'fixed top-[var(--size-header)] bottom-[var(--size-footer)]',
+          'fixed top-0',
           isMain ? 'left-0' : 'right-0',
           'w-[var(--size-sidebar)] h-full',
-          'overflow-auto p-4 space-y-6 bg-[var(--surface-bg)]',
+          'overflow-auto p-4 space-y-2 bg-[var(--surface-bg)]',
           'border-[var(--border-base)]',
-          isMain ? 'border-r' : 'border-l'
+          isMain ? 'border-r' : 'border-none bg-transparent mr-30 overflow-y-hidden',
         )}
       >
         {children}
@@ -56,8 +56,10 @@ export function MainSidebar({
   const mainNav = [
     { label: 'Perfil', icon: User, href: '/profile' },
     { label: 'Amigos', icon: Users, href: '/friends' },
+    { label: 'Explorar', icon: Globe, href: '/feed' },
     { label: 'Estante', icon: BookOpen, href: '/shelf' },
-    { label: 'Explorar', icon: Globe, href: '/' },
+    { label: 'Mensagens', icon: MessageSquare, href: '/messages'},
+    { label: 'Notificações', icon: Bell, href: '/feed'},
     { label: 'Configurações', icon: Settings, href: '/preferences' },
   ] as const;
 
@@ -68,26 +70,27 @@ export function MainSidebar({
     ? (recentBookPagesRead! / recentBookTotalPages!) * 100
     : 0;
 
+
   return (
     <SidebarShell isMain>
-      <nav className="flex flex-col gap-3">
+      <nav className="flex flex-col gap-2">
         {mainNav.map(({ label, icon: Icon, href }) => (
-          <Link key={label} href={href} className="flex justify-end">
+          <Link key={label} href={href} className="flex justify-start">
             <Button
               variant="default"
-              className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-2 rounded-lg border-none"
+              className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-3 rounded-lg border-none"
               aria-label={label}
             >
-              <span>{label}</span>
-              <Icon size={24} />
+              <Icon size={30} />
+              <strong className="text-lg text-[var(--text-secondary)]">{label}</strong>
             </Button>
           </Link>
         ))}
       </nav>
 
-      <section className="mt-6 space-y-3">
+      <section className="mt-2 space-y-2 px-2">
         <h3 className="text-sm font-medium text-[var(--text-secondary)]">
-          Progresso Recente
+          Leitura recente:
         </h3>
 
         {recentBookCover && (
@@ -97,6 +100,17 @@ export function MainSidebar({
               alt="Capa do livro"
               fill
               className="object-cover"
+            />
+          </div> 
+        )}
+
+        {!recentBookCover && (
+          <div className="relative w-full h-80 px-4">
+            <Image
+              src="/assets/images/books/1984.jpg"
+              alt="Capa do livro"
+              fill
+              className="object-cover rounded-lg border border-[var(--border-base)]"
             />
           </div>
         )}
@@ -118,10 +132,10 @@ export function MainSidebar({
         <Button
           variant="default"
           size="sm"
-          className="w-full justify-center hover:bg-[var(--surface-card)] rounded-lg"
+          className="w-full gap-2 justify-center hover:bg-[var(--surface-card-hover)] border-none rounded-lg"
           onClick={onNewBook}
         >
-          <BookOpen size={16} /> Novo Livro
+          <BookOpen size={20} /> <span>Novo Livro</span>
         </Button>
       </section>
     </SidebarShell>
@@ -144,13 +158,13 @@ export function RecommendedSidebar(_props: RecommendedSidebarProps) {
     setLoadingPeople(true);
     fetch('/api/users?limit=5')
       .then((r) => r.json())
-      .then((data) => setPeople(data.slice(0, 5)))
+      .then((data) => setPeople(data.slice(0, 4)))
       .finally(() => setLoadingPeople(false));
 
     setLoadingBooks(true);
     fetch('/api/books?limit=5')
       .then((r) => r.json())
-      .then((data) => setBooks(data.slice(0, 5)))
+      .then((data) => setBooks(data.slice(0, 2)))
       .finally(() => setLoadingBooks(false));
   }, []);
 
