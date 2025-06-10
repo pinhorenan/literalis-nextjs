@@ -25,7 +25,7 @@ function SidebarShell({ isMain, children }: SidebarShellProps) {
           'fixed top-[var(--size-header)] bottom-[var(--size-footer)]',
           isMain ? 'left-0' : 'right-0',
           'w-[var(--size-sidebar)] h-full',
-          'shadow-md overflow-auto p-4 space-y-6 bg-[var(--surface-alt)]',
+          'overflow-auto p-4 space-y-6 bg-[var(--surface-bg)]',
           'border-[var(--border-base)]',
           isMain ? 'border-r' : 'border-l'
         )}
@@ -70,8 +70,6 @@ export function MainSidebar({
 
   return (
     <SidebarShell isMain>
-      <h2 className="text-xl font-semibold mb-4">Olá, {firstName}!</h2>
-
       <nav className="flex flex-col gap-3">
         {mainNav.map(({ label, icon: Icon, href }) => (
           <Link key={label} href={href} className="flex justify-end">

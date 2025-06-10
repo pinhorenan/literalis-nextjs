@@ -1,12 +1,12 @@
 // app/profile/[username]/page.tsx
 import { notFound } from '@server/http';
-import { db }       from '@server/db';
+import { prisma }       from '@server/prisma';
 import ProfileShell from '@components/profile/ProfileShell';
 
 interface Props { params: { username: string } }
 
 export default async function UserProfile({ params }: Props) {
-  const dbUser = await db.user.findUnique({
+  const dbUser = await prisma.user.findUnique({
     where: { username: params.username },
     include: {
       posts: { 

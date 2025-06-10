@@ -4,11 +4,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions }      from '@server/auth';
 import { prisma }           from '@server/prisma';
 
-export async function GET(_: Request, { params }: { params: { userId: string } }) {
+export async function GET(request: Request, context: { params: any }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ follows: false });
 
-  const { userId } = params;
+  const { userId } = await context.params;
 
   const existing = await prisma.follow.findUnique({
     where: {

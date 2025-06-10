@@ -23,7 +23,7 @@ export default function Home() {
 
         <div className="relative w-full max-w-md">
           <Image
-            src="/assets/images/landing-illustration.svg"
+            src="/assets/images/reading_circle.png"
             alt="Ilustração de boas-vindas ao Literalis"
             width={500}
             height={500}

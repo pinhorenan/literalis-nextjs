@@ -1,7 +1,7 @@
 // api/books/route.ts
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { db } from '@server/db'
+import { prisma } from '@server/prisma'
 import { json, conflict, badRequest, serverError } from '@server/http'
 
 const BookInput = z.object({
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     const take   = Number(searchParams.get('take')  ?? '20')
     const cursor = searchParams.get('cursor') ?? undefined
 
-    const books = await db.book.findMany({
+    const books = await prisma.book.findMany({
       orderBy: { title: 'asc' },
       take,
       ...(cursor && { skip: 1, cursor: { isbn: cursor } }),
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   try {
     const data = BookInput.parse(await req.json())
 
-    const book = await db.book.create({ data })
+    const book = await prisma.book.create({ data })
 
     return json(book, 201)
   } catch (e: any) {

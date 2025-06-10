@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@server/prisma'
-import { json, conflict, badRequest, serverError } from '@/src/server/http'
+import { json, conflict, badRequest, serverError } from '@server/http'
 
 const UserInput = z.object({
   username:   z.string().regex(/^[a-z0-9_]+$/i),

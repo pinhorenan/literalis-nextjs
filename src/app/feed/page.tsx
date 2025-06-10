@@ -54,32 +54,15 @@ export default function PageFeed() {
   };
 
   return (
-    <section className="flex gap-4">
-      {/* Sidebar principal */}
-      <MainSidebar
-        // Se precisar, passe aqui onNewBook / props de progresso
-      />
-
-      {/* Feed */}
-      <main className="flex-1 px-4 py-6 space-y-6">
-        {loading ? (
-          <p className="text-center">Carregando feed…</p>
-        ) : posts.length === 0 ? (
-          <p className="text-center text-[var(--text-tertiary)]">
-            Não há posts para mostrar.
-          </p>
-        ) : (
-          posts.map(post => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onAddComment={handleAddComment}
-            />
-          ))
-        )}
+    <section className="flex gap-4 align-middle">
+      <MainSidebar/>
+      <main className="px-4 py-6 space-y-6 mx-auto">
+        {loading  ? (<p className="text-center">Carregando feed…</p>) 
+                  : posts.length === 0 
+                  ? (<p className="text-center text-[var(--text-tertiary)]">Não há posts para mostrar.</p>) 
+                  : (posts.map(post => (<PostCard key={post.id} post={post} onAddComment={handleAddComment} />)) )
+        }
       </main>
-
-      {/* Sidebar de recomendações */}
       <RecommendedSidebar />
     </section>
   );

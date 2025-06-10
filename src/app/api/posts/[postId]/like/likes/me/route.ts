@@ -5,11 +5,11 @@ import { ReactionType }     from '@prisma/client';
 import { authOptions }      from '@server/auth';
 import { prisma }           from '@server/prisma';
 
-export async function GET(_: Request, { params }: { params: { postId: string } }) {
+export async function GET(request: Request, context: { params: any }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ liked: false });
 
-  const { postId } = params;
+  const { postId } =  await context.params;
 
   const existing = await prisma.reaction.findUnique({
     where: {

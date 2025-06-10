@@ -14,12 +14,10 @@ type HeaderVariant = 'landing' | 'feed' | 'profile' | 'unauthenticated';
 
 interface HeaderProps {
   variant?: HeaderVariant;
-  translucent?: boolean;
 }
 
 export default function Header({
   variant = 'feed',
-  translucent = false,
 }: HeaderProps) {
   const { data: session, status } = useSession();
   const loggedIn = status === 'authenticated';
@@ -33,21 +31,12 @@ export default function Header({
   };
 
   const baseClasses = clsx(
-    'fixed top-0 z-50 w-screen border-b',
-    translucent
-      ? 'backdrop-blur-sm bg-[var(--surface-alt)/60] dark:bg-[var(--surface-alt)/60]'
-      : 'bg-[var(--surface-alt)] dark:bg-[var(--surface-alt)]',
-    'border-[var(--border-base)]'
+    'fixed top-0 z-50 w-screen',
+    'border-b border-[var(--border-base)]',
+    'bg-[var(--surface-alt)] dark:bg-[var(--surface-alt)]'
   );
 
-  const logo = (
-    <Button
-      variant="logo"
-      logoSrc="/assets/icons/logo_small.svg"
-      logoSize={40}
-      href="/"
-    />
-  );
+  const logo = ( <Button variant="logo" logoSrc="/assets/icons/logo_small.svg" logoSize={40} href="/" /> );
 
   // -------------------------
   // 1) Landing (não autenticado)
@@ -57,10 +46,10 @@ export default function Header({
       <Button variant="default" onClick={() => router.push('/about')}>
         Sobre
       </Button>
-      <Button variant="default" onClick={() => router.push('/login')}>
+      <Button variant="default" onClick={() => router.push('/auth/login')}>
         Entrar
       </Button>
-      <Button variant="default" onClick={() => router.push('/register')}>
+      <Button variant="default" onClick={() => router.push('/auth/register')}>
         Criar conta
       </Button>
       <ThemeToggle />
@@ -71,7 +60,7 @@ export default function Header({
   // 2) Feed (usuário autenticado)
   // -------------------------
   const FeedNav = () => (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-4 mx-[var(--size-sidebar)]">
       <ThemeToggle />
       <Button
         variant="icon"
@@ -121,8 +110,8 @@ export default function Header({
   );
 
   return (
-    <header className={baseClasses} style={{ height: 'var(--size-header)' }}>
-      <div className="container mx-auto flex items-center justify-between px-4 h-full">
+    <header className={baseClasses} style={{ height: 'var(--size-header' }}>
+      <div className="container mx-[var(--size-sidebar)] flex items-center justify-between h-full">
         {logo}
 
         {variant === 'landing' && !loggedIn && <LandingNav />}

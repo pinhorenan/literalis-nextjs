@@ -5,11 +5,11 @@ import { ReactionType }     from '@prisma/client';
 import { authOptions }      from '@server/auth';
 import { prisma }           from '@server/prisma';
 
-export async function POST(_: Request, { params }: { params: { postId: string } }) {
+export async function POST(request: Request, context: { params: any }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { postId } = params;
+  const { postId } = await context.params;
 
   await prisma.$transaction([
     prisma.reaction.upsert({

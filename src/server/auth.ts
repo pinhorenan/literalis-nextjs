@@ -1,59 +1,80 @@
-// server/auth.ts
-import type { NextAuthOptions } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import bcrypt from "bcryptjs";
-import { prisma } from "@server/prisma";
+import type { NextAuthOptions } from 'next-auth';
+import CredentialsProvider      from 'next-auth/providers/credentials';
+import { PrismaAdapter }        from '@next-auth/prisma-adapter';
+import bcrypt                   from 'bcryptjs';
+import { prisma }               from '@server/prisma';
 
 export const authOptions: NextAuthOptions = {
-  // ───────────────────────────────────────────────────────────────
-  adapter: PrismaAdapter(prisma),          // ainda usamos o adapter ⇠ User no DB
-  session: { strategy: "jwt" },        // ⇦ trocado para JWT
-  // ───────────────────────────────────────────────────────────────
+  // ── Adapter + estratégia de sessão ──────────────────────────
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy : 'jwt',
+  },
 
+  // ── Provider de credenciais ─────────────────────────────────
   providers: [
-    Credentials({
-      name: "Credentials",
+    CredentialsProvider({
+      name: 'Credenciais',
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" },
+        username: { label: 'Usuário', type: 'text' },
+        password: { label: 'Senha',   type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
+        if (!credentials?.username || !credentials.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
-        });
+        const username = credentials.username.trim().toLowerCase();
+        const user = await prisma.user.findUnique({ where: { username } });
         if (!user || !user.password) return null;
 
         const ok = await bcrypt.compare(credentials.password, user.password);
         if (!ok) return null;
 
-        // Campos enviados para o JWT
+        const avatar = user.avatarPath ?? '';
+
+        // campos exigidos pelo seu módulo de tipagem
         return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.avatarPath,
+          id         : user.id,
+          name       : user.name,
+          email      : user.email,
+          image      : avatar,      // campo padrão do NextAuth
+          username   : user.username,
+          avatarPath : avatar,
+          bio        : user.bio ?? '',
         };
       },
     }),
   ],
 
-  pages: { signIn: "/login" },
+  // ── Páginas customizadas ────────────────────────────────────
+  pages: {
+    signIn: '/auth/login',
+    error : '/auth/login',
+  },
 
+  // ── Callbacks (propagam dados extras) ───────────────────────
   callbacks: {
-    // grava id no token
     async jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id         = user.id;
+        token.username   = (user as any).username;
+        token.avatarPath = (user as any).avatarPath;
+        token.bio        = (user as any).bio;
+      }
       return token;
     },
-    // expõe id no session.user
+
     async session({ session, token }) {
-      if (token?.id) (session.user as any).id = token.id;
+      session.user = {
+        ...session.user,
+        id         : token.id         as string,
+        username   : token.username   as string,
+        avatarPath : token.avatarPath as string,
+        bio        : token.bio        as string,
+      };
       return session;
     },
   },
 
-  secret: process.env.NEXTAUTH_SECRET, // já deve existir
+  // ── Configuração do JWT ─────────────────────────────────────
+  secret: process.env.NEXTAUTH_SECRET,
 };

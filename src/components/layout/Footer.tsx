@@ -10,6 +10,7 @@ const items = [
 export default function Footer() {
   return (
     <footer className="
+      sticky bottom-0 left-0 w-full
       bg-[var(--surface-alt)] text-[var(--text-secondary)]
       border-t border-[var(--border-base)]
       px-[var(--gap-md)] py-10 z-90

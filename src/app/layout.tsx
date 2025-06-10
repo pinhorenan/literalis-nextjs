@@ -1,13 +1,12 @@
 // app/layout.tsx
-import React                from 'react';
-import { getServerSession } from 'next-auth';
-import type { Metadata }    from 'next';
+import React                from  'react';
+import type { Metadata }    from  'next';
+import { getServerSession } from  'next-auth';
+import { authOptions }      from  '@server/auth';
 
-import Header from          '@components/layout/Header';
-import Footer from          '@components/layout/Footer';
-import ThemeProvider from   '@app/theme-provider';
-import Providers from       '@app/providers';
-import { authOptions } from '@server/auth';
+import Header               from  '@components/layout/Header';
+import ThemeProvider        from  '@app/theme-provider';
+import Providers            from  '@app/providers';
 
 import '@styles/globals.css';
 
@@ -20,11 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 
   return (
@@ -32,13 +27,10 @@ export default async function RootLayout({
       <body className="min-h-screen min-w-screen font-sans antialiased bg-[var(--surface-base)] text-[var(--text-primary)]">
         <Providers session={session}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {/* Header global e fixo */}
-            <Header translucent />
-
-            {/* Offset p/ não sobrepor o conteúdo */}
-            <div className="pt-[var(--size-header)]">{children}</div>
-
-            <Footer />
+            <Header variant={session ? 'feed' : 'landing'} />
+            <div className="pt-[var(--size-header)] h-[100vh_-_var(--size-footer)] bg-[var(--surface-bg)]">
+              {children}
+            </div>
           </ThemeProvider>
         </Providers>
       </body>
