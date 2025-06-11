@@ -2,9 +2,10 @@
 import React                from  'react';
 import type { Metadata }    from  'next';
 import { getServerSession } from  'next-auth';
+import { useTheme }         from  'next-themes';
+
 import { authOptions }      from  '@server/auth';
 
-import Header               from  '@components/layout/Header';
 import ThemeProvider        from  '@app/theme-provider';
 import Providers            from  '@app/providers';
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   title: 'Literalis',
   description: 'Rede social literária',
   icons: {
-    icon: '/favicon.svg',
+    icon: '/icons/favicon.svg',
     shortcut: '/favicon.svg',
   },
 };

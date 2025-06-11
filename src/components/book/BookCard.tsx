@@ -1,8 +1,9 @@
 // components/book/BookCard.tsx
+'use client';
 
+import { BookCover, BookCoverSkeleton } from '@components/book/BookCover';
+import { BookInfo,  BookInfoSkeleton  } from '@components/book/BookInfo';
 import type { Book } from '@prisma/client';
-import { BookCover } from '@components/book/BookCover';
-import { BookInfo } from '@components/book/BookInfo';
 
 export function BookCard({ book }: { book: Book }) {
     return (
@@ -29,6 +30,18 @@ export function BookCard({ book }: { book: Book }) {
     );
   }
 
+  export function BookCardSkeleton() {
+    return (
+      <div className="
+        flex gap-5 p-4 rounded-md border border-[var(--border-base)]
+        bg-[var(--surface-card)]
+      ">
+        <BookCoverSkeleton width={120} height={180} />
+        <BookInfoSkeleton className="flex-1" />
+      </div>
+    );
+  }
+
   export function BookCardCompact({ book }: { book: Book }) {
     return (
       <div className="flex items-center gap-2 p-2 rounded-md hover:bg-[var(--surface-card-hover)] transition-colors">
@@ -45,6 +58,21 @@ export function BookCard({ book }: { book: Book }) {
         />
       </div>
     );
+  }
+
+  export function BookCardCompactSkeleton() {
+    return (
+      <div className="
+        flex items-center gap-2 p-2 rounded-md
+        bg-[var(--surface-card)] animate-pulse
+      ">
+        <BookCoverSkeleton width={80} height={120} />
+        <div className="flex-1">
+          <div className="h-4 w-2/3 bg-[var(--surface-card)] rounded mb-2 animate-pulse" />
+          <div className="h-4 w-1/3 bg-[var(--surface-card)] rounded animate-pulse" />
+        </div>
+      </div>
+    )
   }
 
   export function BookCardMini({ book }: { book: Book }) {

@@ -1,6 +1,9 @@
 // components/feed/PostCard.tsx
 'use client';
 
+import Link   from  'next/link';
+import clsx   from  'clsx';
+import Image  from 'next/image';
 import { useEffect, useRef, useState }    from 'react';
 import { Heart, MessageCircle }           from 'lucide-react';
 import { useSession }                     from 'next-auth/react';
@@ -8,14 +11,11 @@ import { useRouter }                      from 'next/navigation';
 
 import { Button }       from '@components/ui/Buttons';
 import { relativeTime } from '@hooks/relativeTime';
+import { BookCover }    from '@components/book/BookCover';
+import { BookInfo }     from '@components/book/BookInfo';
 
-import Image from 'next/image';
-import Link from  'next/link';
-import clsx from  'clsx';
 
 import type { Post, User, Book, Comment } from '@prisma/client';
-import { BookCover } from '../book/BookCover';
-import { BookInfo } from '../book/BookInfo';
 
 export type CommentWithAuthor = Comment & { author: User };
 
@@ -32,14 +32,12 @@ interface Props {
   onAddComment: (postId: string, text: string) => void;
 }
 
-export default function PostCard({ post, onAddComment }: Props) {
+export function PostCard({ post, onAddComment }: Props) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const me = session?.user;
-  
-  /* ------------------------------------------------------------
-  *  STATE
-  * ------------------------------------------------------------ */
+
+  // refs and state
   const inputRef = useRef<HTMLInputElement>(null);
   const [liked, setLiked] = useState<boolean>(false);
   const [likeCount, setLikeCount] = useState<number>(post.reactionsCount);
@@ -49,9 +47,7 @@ export default function PostCard({ post, onAddComment }: Props) {
   
   const displayedComments = showAllComments ? post.comments : post.comments.slice(0, 3);
 
-  /* ------------------------------------------------------------
-   *  SYNC LIKE / FOLLOW STATUS
-   * ------------------------------------------------------------ */
+  // sync liked and following state with server
   useEffect(() => {
     if (status !== 'authenticated') return;
     (async () => {
@@ -70,9 +66,7 @@ export default function PostCard({ post, onAddComment }: Props) {
     })();
   }, [post.id, post.authorId, status]);
 
-  /* ------------------------------------------------------------
-   *  HANDLERS
-   * ------------------------------------------------------------ */
+  // handlers
   const toggleLike = async () => {
     if (status !== 'authenticated') return router.push('/login');
     const method = liked ? 'DELETE' : 'POST';
@@ -82,14 +76,12 @@ export default function PostCard({ post, onAddComment }: Props) {
       setLikeCount(count => count + (liked ? -1 : 1));
     }
   };
-
   const toggleFollow = async () => {
     if (status !== 'authenticated') return router.push('/login');
     const method = following ? 'DELETE' : 'POST';
     const res = await fetch(`/api/users/${post.authorId}/follow`, { method });
     if (res.ok) setFollowing(!following);
   };
-
   const handleComment = () => {
     const text = draft.trim();
     if (!text) {
@@ -233,6 +225,44 @@ export default function PostCard({ post, onAddComment }: Props) {
             <strong>Exibir menos</strong>
           </button>
         )}
+      </div>
+    </article>
+  );
+}
+
+export function PostCardSkeleton() {
+  return (
+    <article className="max-w-[700px] border-b border-[var(--border-base)] animate-pulse">
+      <div className="flex flex-col md:flex-row p-4 gap-4">
+        <div className="flex gap-4 basis-4/7">
+          <div className="bg-[var(--surface-card)] border border-[var(--border-base)] rounded w-[120px] h-[180px]" />
+          <div className="flex flex-col flex-1 space-y-2">
+            <div className="h-6 w-2/3 bg-[var(--surface-card)] rounded" />
+            <div className="h-4 w-1/2 bg-[var(--surface-card)] rounded" />
+            <div className="h-4 w-1/3 bg-[var(--surface-card)] rounded" />
+          </div>
+        </div>
+
+        <div className="flex flex-col basis-3/7 space-y-4">
+          <div className="h-4 w-1/2 bg-[var(--surface-card)] rounded" />
+          <div className="h-24 bg-[var(--surface-card)] rounded" />
+          <div className="h-4 w-1/3 bg-[var(--surface-card)] rounded self-end" />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 border-t border-[var(--border-base)] p-4">
+        <div className="h-6 w-6 bg-[var(--surface-card)] rounded-full" />
+        <div className="h-4 w-10 bg-[var(--surface-card)] rounded" />
+        <div className="flex-1 h-8 bg-[var(--surface-card)] rounded" />
+      </div>
+
+      <div className="px-4 py-2 space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="h-6 w-6 bg-[var(--surface-card)] rounded-full" />
+            <div className="h-4 w-3/4 bg-[var(--surface-card)] rounded" />
+          </div>
+        ))}
       </div>
     </article>
   );

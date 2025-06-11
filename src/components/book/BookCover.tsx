@@ -34,3 +34,20 @@ export function BookCover({
 
     return href ? <Link href={href}>{img}</Link> : img;
 }
+
+export function BookCoverSkeleton({
+    width = 120,
+    height = 180,
+    className = '',
+}: {
+    width?: number;
+    height?: number;
+    className?: string;
+}) {
+    return (
+        <div
+            className={`bg-[var(--surface-card)] border border-[var(--border-base)] rounded ${className} animate-pulse`}
+            style={{ width, height }}
+        />
+    );
+}

@@ -1,9 +1,11 @@
 // components/layout/Sidebar.tsx
 'use client';
 
-import { User, Globe, BookOpen, Settings, Users, MessageSquare, Bell, Plus } from 'lucide-react';
+import { User, Globe, BookOpen, Settings, Users, MessageSquare, Bell, Plus, Search } from 'lucide-react';
 import { useEffect, useState, ReactNode }               from 'react';
 import { useSession }                                   from 'next-auth/react';
+import { useTheme }                                     from 'next-themes';
+
 import { Button }                                       from '@components/ui/Buttons';
 
 import type { Book, User as PrismaUser } from '@prisma/client';
@@ -39,28 +41,29 @@ function SidebarShell({ isMain, children }: SidebarShellProps) {
 export interface MainSidebarProps {
 }
 export function MainSidebar(_props: MainSidebarProps) {
+  const { theme, systemTheme } = useTheme();
   const { data: session } = useSession();
   const me = session?.user;
   const userName = me?.name ?? me?.email ?? 'Visitante';
   const firstName = userName.split(' ')[0];
+  const currentTheme = theme === 'system' ? systemTheme : theme;
 
   const mainNav = [
     { label: 'Perfil', icon: User, href: '/profile' },
     { label: 'Amigos', icon: Users, href: '/friends' },
     { label: 'Explorar', icon: Globe, href: '/feed' },
     { label: 'Estante', icon: BookOpen, href: '/shelf' },
+    { label: 'Pesquisar', icon: Search, href: '/search' },
     { label: 'Mensagens', icon: MessageSquare, href: '/messages'},
     { label: 'Notificações', icon: Bell, href: '/notifications'},
   ] as const;
-
-
 
   return (
     <SidebarShell isMain>
       <div className="flex flex-col h-full">
         <Button
           variant="logo"
-          logoSrc="/assets/icons/main_logo.svg"
+          logoSrc={currentTheme === 'dark' ? "/assets/icons/dark/main_logo.svg" :  "/assets/icons/light/main_logo.svg"}
           logoSize={140}
           logoAlt="Logo do site"
           className="mb-2 self-start"

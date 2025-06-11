@@ -5,6 +5,7 @@ import clsx                       from 'clsx';
 import { useState }               from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut }    from 'next-auth/react';
+import { useTheme }               from 'next-themes';
 import { MessageSquare, Bell }    from 'lucide-react';
 import { Button, ThemeToggle }    from '@components/ui/Buttons';
 import { SearchBar }              from '@components/ui/SearchBar';
@@ -19,11 +20,21 @@ interface HeaderProps {
 export default function Header({
   variant = 'feed',
 }: HeaderProps) {
+  const { theme, systemTheme, setTheme } = useTheme();
   const { data: session, status } = useSession();
   const loggedIn = status === 'authenticated';
   const router = useRouter();
   const pathname = usePathname();
   const [q, setQ] = useState('');
+
+    // enquanto o tema não estiver definido no client, evita hydratation mismatch
+  const mounted = typeof window !== 'undefined';
+  const currentTheme = theme === 'system' ? systemTheme : theme;
+
+  if (!mounted) {
+    return null; // ou um loading skeleton
+  }
+
 
   const onSearch = () => {
     const term = q.trim();
@@ -36,7 +47,7 @@ export default function Header({
     'bg-[var(--surface-alt)]'
   );
 
-  const logo = ( <Button variant="logo" logoSrc="/assets/icons/logo_small.svg" logoSize={40} href="/" /> );
+  const logo = ( <Button variant="logo" logoSrc={currentTheme === 'dark' ? "/assets/icons/dark/logo_small.svg" : "/assets/icons/light/logo_small.svg"} logoSize={40} href="/" /> );
 
   // -------------------------
   // 1) Landing (não autenticado)
