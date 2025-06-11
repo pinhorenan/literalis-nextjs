@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@components/ui/Buttons';
-import PostCard, { CommentWithAuthor, PostWithRelations } from '@components/feed/PostCard';
+import PostCard, { CommentWithAuthor, PostWithRelations } from '@/src/components/post/PostCard';
 
 import Image from 'next/image';
 import Link from 'next/link';

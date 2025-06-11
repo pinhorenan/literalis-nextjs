@@ -1,36 +1,29 @@
-// components/ui/Buttons.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react'
-import clsx from 'clsx'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Sun, Moon } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 /* -------------------------------------------------------------------------- */
 /*                             TIPOS COMPARTILHADOS                            */
 /* -------------------------------------------------------------------------- */
-export type ButtonVariant = 'default' | 'icon' | 'logo'
-export type ButtonSize    = 'sm' | 'md' | 'lg'
+export type ButtonVariant = 'default' | 'icon' | 'logo' | 'outline' | 'destructive';
+export type ButtonSize    = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Tipo do botão: padrão, só ícone, ou logo clicável */
-  variant?:   ButtonVariant
-  /** Tamanho geral do padding/fonte */
-  size?:      ButtonSize
-  /** Estado ativo (aplica ring ou fill) */
-  active?:    boolean
-  className?: string
-  /** Link opcional */
-  href?:      string
-  /** Ícone para variante icon */
-  icon?:      React.ElementType | React.ReactElement
-  iconSize?:  number
-  /** Fonte da logo para variante logo */
-  logoSrc?:   string
-  logoAlt?:   string
-  logoSize?:  number
+  variant?:   ButtonVariant;
+  size?:      ButtonSize;
+  active?:    boolean;
+  className?: string;
+  href?:      string;
+  icon?:      React.ElementType | React.ReactElement;
+  iconSize?:  number;
+  logoSrc?:   string;
+  logoAlt?:   string;
+  logoSize?:  number;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -45,19 +38,22 @@ const baseClasses = [
   'inline-flex',
   'items-center',
   'justify-center',
-]
+];
 
 const variantStyles: Record<ButtonVariant, string> = {
-  default: 'rounded-md border border-[var(--border-color)] bg-[var(--surface-bg)] text-[var(--text-primary)] hover:bg-[var(--color-olive)] hover:text-[var(--color-offwhite)]',
-  icon:    'rounded-full bg-transparent text-[var(--color-primary)]',
-  logo:    'bg-transparent p-0',
-}
+  default:     'rounded-md border border-[var(--border-color)] bg-[var(--surface-bg)] text-[var(--text-primary)] hover:bg-[var(--color-olive)] hover:text-[var(--color-offwhite)]',
+  icon:        'rounded-full bg-transparent text-[var(--color-primary)]',
+  logo:        'bg-transparent p-0',
+  outline:     'rounded-md border border-[var(--border-color)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-bg)]',
+  destructive: 'rounded-md bg-red-600 text-white hover:bg-red-700',
+};
 
 const sizeStyles: Record<ButtonSize, string> = {
+  xs: 'p-1 text-xs',
   sm: 'p-2 text-sm',
   md: 'p-3 text-base',
   lg: 'p-4 text-lg',
-}
+};
 
 /* -------------------------------------------------------------------------- */
 /*                                 COMPONENTE                                  */
@@ -82,8 +78,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const isIcon = variant === 'icon'
-    const isLogo = variant === 'logo'
+    const isIcon = variant === 'icon';
+    const isLogo = variant === 'logo';
 
     const classes = clsx(
       baseClasses,
@@ -93,25 +89,29 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       !disabled && !href && 'cursor-pointer',
       active && (isIcon ? 'fill-current' : 'ring-2 ring-[var(--color-primary)]'),
       className,
-    )
+    );
 
-    // Handle Link separately: only pass href, className, children, onClick
+    // Link
     if (href) {
       return (
         <Link href={href} className={classes} onClick={onClick as any}>
-          {isIcon && icon
-            ? React.isValidElement(icon)
+          {isIcon && icon ? (
+            React.isValidElement(icon)
               ? icon
-              : React.createElement(icon as React.ElementType, { size: iconSize, className: clsx(active ? 'fill-current' : 'hover:fill-current') })
-            : isLogo && logoSrc
-            ? <Image src={logoSrc} alt={logoAlt} width={logoSize} height={logoSize} />
-            : children
-          }
+              : React.createElement(icon as React.ElementType, {
+                  size: iconSize,
+                  className: clsx(active ? 'fill-current' : 'hover:fill-current'),
+                })
+          ) : isLogo && logoSrc ? (
+            <Image src={logoSrc} alt={logoAlt} width={logoSize} height={logoSize} />
+          ) : (
+            children
+          )}
         </Link>
-      )
+      );
     }
 
-    // Native button
+    // Botão nativo
     return (
       <button
         ref={ref}
@@ -120,29 +120,33 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onClick={onClick}
         {...rest}
       >
-        {isIcon && icon
-          ? React.isValidElement(icon)
+        {isIcon && icon ? (
+          React.isValidElement(icon)
             ? icon
-            : React.createElement(icon as React.ElementType, { size: iconSize, className: clsx(active ? 'fill-current' : 'hover:fill-current') })
-          : isLogo && logoSrc
-          ? <Image src={logoSrc} alt={logoAlt} width={logoSize} height={logoSize} />
-          : children
-        }
+            : React.createElement(icon as React.ElementType, {
+                size: iconSize,
+                className: clsx(active ? 'fill-current' : 'hover:fill-current'),
+              })
+        ) : isLogo && logoSrc ? (
+          <Image src={logoSrc} alt={logoAlt} width={logoSize} height={logoSize} />
+        ) : (
+          children
+        )}
       </button>
-    )
+    );
   },
-)
-Button.displayName = 'Button'
+);
+Button.displayName = 'Button';
 
 /* -------------------------------------------------------------------------- */
 /*                               TOGGLE DE TEMA                                */
 /* -------------------------------------------------------------------------- */
 export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return null
-  const isDark = resolvedTheme === 'dark'
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <Button
@@ -152,5 +156,5 @@ export function ThemeToggle() {
       active={isDark}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     />
-  )
+  );
 }

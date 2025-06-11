@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { MainSidebar, RecommendedSidebar } from '@components/layout/Sidebar';
-import PostCard, { PostWithRelations, CommentWithAuthor } from '@components/feed/PostCard';
+import PostCard, { PostWithRelations, CommentWithAuthor } from '@/src/components/post/PostCard';
 
 export default function PageFeed() {
   const [posts, setPosts] = useState<PostWithRelations[]>([]);

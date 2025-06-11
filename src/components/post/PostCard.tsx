@@ -14,6 +14,8 @@ import Link from  'next/link';
 import clsx from  'clsx';
 
 import type { Post, User, Book, Comment } from '@prisma/client';
+import { BookCover } from '../book/BookCover';
+import { BookInfo } from '../book/BookInfo';
 
 export type CommentWithAuthor = Comment & { author: User };
 
@@ -102,34 +104,23 @@ export default function PostCard({ post, onAddComment }: Props) {
   return (
     <article className=" overflow-hidden max-w-[700px] border-b border-[var(--border-base)]">
       <div className="flex flex-col md:flex-row p-4">
-        {/* esquerda(2/3) -> livro */}
         <div className="flex flex-row gap-4 basis-4/7 border-r border-[var(--border-base)]" >
-          {/* capa do livro */}
-          <Image src={post.book.coverPath} alt={`Capa: ${post.book.title}`} width={120} height={180} className="rounded object-cover border" />
-          {/* detalhes do livro */}
-          <div className="flex flex-col">
-              <h2 className="text-lg font-semibold">{post.book.title}</h2>
-              <p className="text-md text-[var(--text-secondary)]">por {post.book.author}</p>
-            <div className="mt-2 space-y-2">
-              <p className="text-sm text-[var(--text-tertiary)]">
-                {post.book.publisher}, ed. {post.book.edition}
-              </p>
-              <p className="text-sm text-[var(--text-tertiary)]">
-                {post.book.pages} páginas • {post.book.language}
-              </p>
-              <p className="text-sm text-[var(--text-tertiary)]">
-                Publicado em {new Date(post.book.publicationDate).toLocaleDateString()}
-              </p>
-              <p className="text-sm text-[var(--text-tertiary)]">
-                <strong>ISBN:</strong> {post.book.isbn}
-              </p>
-            </div>
-          </div>
+          <BookCover
+            src={post.book.coverPath}
+            alt={`Capa: ${post.book.title}`}
+            width={120}
+            height={180}
+            href={`/books/${post.book.isbn}`}
+          />
+          <BookInfo
+            book={post.book}
+            className="mt-2 space-y-2"
+            showPublicationDate
+            strongIsbnLabel
+          />
         </div>
 
-        {/* direita(1/3) -> post */}
         <div className="flex flex-col basis-3/7 ml-4">
-          {/* cabeçalho com autor e data */}
           <header className="flex items-center justify-between pb-4">
             <div className="flex items-center gap-3">
               <Link href={`/profile/${post.author.username}`}>
