@@ -1,19 +1,18 @@
 // components/layout/Sidebar.tsx
 'use client';
 
-import { User, Globe, BookOpen, Settings, Users, MessageSquare, Bell, Plus, Search } from 'lucide-react';
-import { useEffect, useState, ReactNode }               from 'react';
-import { useSession }                                   from 'next-auth/react';
-import { useTheme }                                     from 'next-themes';
+import { User, Globe, BookOpen, Settings, Users, MessageSquare, Bell, Search } from 'lucide-react';
+import { useEffect, useState, ReactNode } from 'react';
+import { signOut, useSession } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 
-import { Button }                                       from '@components/ui/Buttons';
+import { Button, ThemeToggle } from '@components/ui/Buttons';
 
 import type { Book, User as PrismaUser } from '@prisma/client';
 
 import Image  from 'next/image';
 import Link   from 'next/link';
 import clsx   from 'clsx';
-
 
 interface SidebarShellProps {
   isMain: boolean;
@@ -24,12 +23,9 @@ function SidebarShell({ isMain, children }: SidebarShellProps) {
     <aside className="relative flex-shrink-0 w-[var(--size-sidebar)]">
       <div
         className={clsx(
-          'fixed top-0',
-          isMain ? 'left-0' : 'right-0',
-          'w-[var(--size-sidebar)] h-full',
-          'overflow-auto p-4 space-y-2 bg-[var(--surface-bg)]',
-          'border-[var(--border-base)]',
-          isMain ? 'border-r' : 'border-none bg-transparent mr-30 overflow-y-hidden',
+          'fixed top-0 w-[var(--size-sidebar)] h-full',
+          'overflow-auto p-4 space-y-2',
+          isMain ? 'left-0 border-r border-[var(--border-base)] bg-[var(--surface-bg)]' : 'right-0 border-none bg-transparent',
         )}
       >
         {children}
@@ -38,24 +34,20 @@ function SidebarShell({ isMain, children }: SidebarShellProps) {
   );
 }
 
-export interface MainSidebarProps {
-}
+export interface MainSidebarProps {}
 export function MainSidebar(_props: MainSidebarProps) {
+  const [prefOpen, setPrefOpen] = useState(false);
   const { theme, systemTheme } = useTheme();
-  const { data: session } = useSession();
-  const me = session?.user;
-  const userName = me?.name ?? me?.email ?? 'Visitante';
-  const firstName = userName.split(' ')[0];
   const currentTheme = theme === 'system' ? systemTheme : theme;
-
+  
   const mainNav = [
-    { label: 'Perfil', icon: User, href: '/profile' },
-    { label: 'Amigos', icon: Users, href: '/friends' },
-    { label: 'Explorar', icon: Globe, href: '/feed' },
-    { label: 'Estante', icon: BookOpen, href: '/shelf' },
-    { label: 'Pesquisar', icon: Search, href: '/search' },
-    { label: 'Mensagens', icon: MessageSquare, href: '/messages'},
-    { label: 'Notificações', icon: Bell, href: '/notifications'},
+    { label: 'Perfil',        icon: User,           href: '/profile/me'   },
+    { label: 'Amigos',        icon: Users,          href: '/friends'      },
+    { label: 'Explorar',      icon: Globe,          href: '/feed'         },
+    { label: 'Estante',       icon: BookOpen,       href: '/shelf'        },
+    { label: 'Pesquisar',     icon: Search,         href: '/search'       },
+    { label: 'Mensagens',     icon: MessageSquare,  href: '/messages'     },
+    { label: 'Notificações',  icon: Bell,           href: '/notifications'},
   ] as const;
 
   return (
@@ -80,19 +72,37 @@ export function MainSidebar(_props: MainSidebarProps) {
                 aria-label={label}
               >
                 <Icon size={30} className="text-[var(--text-secondary)]"/>
-                <strong className="text-lg text-[var(--text-secondary)]">{label}</strong>
+                <strong className="text-lg text-[var(--text-secondary)]">
+                  {label}
+                  </strong>
               </Button>
             </Link>
           ))}
         </nav>
-        <Button
-          variant="default"
-          className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-3 rounded-lg border-none mt-auto self-start"
-          onClick={() => alert(`Olá, ${firstName}!`)}
+
+        {/* Dropdown preferências */}
+        <div className="relative mt-auto self-start">
+          <Button
+            variant="default"
+            className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-3 rounded-lg border-none"
+            onClick={() => setPrefOpen((o) => !o)}
           >
-            <Settings size={30} className="text-[var(--text-secondary)]"/> 
-            <strong className="text-lg text-[var(--text-secondary)]">Preferências</strong>
-        </Button> 
+            <Settings size={30} className="text-[var(--text-secondary)]" />
+            <strong className="text-lg text-[var(--text-secondary)]">
+              Preferências
+            </strong>
+          </Button>
+
+          {prefOpen && (
+            <div className="absolute flex bottom-full mb-2 left-0 w-40 bg-[var(--surface-bg)] border border-[var(--border-base)] rounded-lg shadow-[var(--shadow-sm)] p-2 space-y-1 z-10">
+              <ThemeToggle />
+
+              <Button size="xs" variant="default" onClick={() => signOut()}>
+                Logout
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </SidebarShell>
   );
@@ -167,7 +177,7 @@ export function RecommendedSidebar({
       {loadingPeople && <p className="text-sm">Carregando…</p>}
       <ul className="space-y-3">
         {people.map((p) => (
-          <li key={p.id} className="group">
+          <li key={p.username} className="group">
             <Link
               href={`/profile/${p.username}`}
               className="flex items-center gap-2"

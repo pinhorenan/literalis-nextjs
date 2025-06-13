@@ -1,20 +1,14 @@
 // app/profile/me/page.tsx
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@server/auth';
-import { notFound } from '@server/http';
-import ProfileShell from '@components/profile/ProfileShell';
+import { authOptions }      from '@server/auth';
+import { redirect }          from 'next/navigation';
 
-export default async function MyProfilePage() {
+export default async function MePage() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.username) return notFound();
 
-  // busca perfil e posts via o mesmo endpoint
-  const res = await fetch(`/api/users/${session.user.username}`, {
-  next: { revalidate: 60 },
-  });
-  if (!res.ok) return notFound();
+  if (!session?.user?.username) {
+    return redirect('/login');
+  }
 
-  const { user, posts } = await res.json();
-
-  return <ProfileShell initialUser={user} initialPosts={posts} />;
+  return redirect(`/profile/${session.user.username}`);
 }

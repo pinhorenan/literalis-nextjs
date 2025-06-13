@@ -2,7 +2,6 @@
 import React                from  'react';
 import type { Metadata }    from  'next';
 import { getServerSession } from  'next-auth';
-import { useTheme }         from  'next-themes';
 
 import { authOptions }      from  '@server/auth';
 
@@ -27,8 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="pt-BR" suppressHydrationWarning>
       <body className="min-h-screen min-w-screen font-sans antialiased bg-[var(--surface-base)] text-[var(--text-primary)]">
         <Providers session={session}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {/* <Header variant={session ? 'feed' : 'landing'} /> */}
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <div className="bg-[var(--surface-bg)">
               {children}
             </div>

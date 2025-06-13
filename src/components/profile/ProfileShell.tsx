@@ -1,109 +1,100 @@
 // components/profile/ProfileShell.tsx
-'use client';
+'use client'
 
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 
-import { Button } from '@components/ui/Buttons';
-import PostCard, { CommentWithAuthor, PostWithRelations } from '@/src/components/post/PostCard';
+import { FollowButton, EditProfileButton  } from '@components/ui/Buttons'
+import {
+  PostCard,
+  type PostWithRelations,
+  type CommentWithAuthor,
+} from '@components/post/Post'
 
-import Image from 'next/image';
-import Link from 'next/link';
-
+/** ---------------------------------------------------------------
+ * Tipagens de props – agora id → username
+ * --------------------------------------------------------------*/
 interface ProfileShellProps {
   initialUser: {
-    id: string;
-    username: string;
-    name: string;
-    email?: string;
-    avatarPath: string;
-    bio?: string;
-    followerIds: string[];
-    followingIds: string[];
-  };
-  initialPosts: PostWithRelations[];
+    username: string
+    name: string
+    email?: string
+    avatarPath: string
+    bio?: string
+    followerUsernames: string[]
+    followingUsernames: string[]
+  }
+  initialPosts: PostWithRelations[]
 }
 
-export default function ProfileShell({
-  initialUser,
-  initialPosts,
-}: ProfileShellProps) {
-  const { data: session, status } = useSession();
-  const meId = session?.user?.id;
+export default function ProfileShell({ initialUser, initialPosts }: ProfileShellProps) {
+  const { data: session, status } = useSession()
+  const meUsername = session?.user?.username
+  const loggedIn = status === 'authenticated'
 
-  const [user, setUser] = useState(initialUser);
-  const [posts, setPosts] = useState(initialPosts);
-  const [following, setFollowing] = useState(false);
+  const [user, setUser] = useState(initialUser)
+  const [posts, setPosts] = useState(initialPosts)
+  const [following, setFollowing] = useState(false)
 
-  /* ------------------------------------------------------------ *
-   *  SE EU JÁ SIGO ESSE PERFIL                                   *
-   * ------------------------------------------------------------ */
+  /** ───────────────── Verifica follow (GET /users/:username/follow) */
   useEffect(() => {
-    if (status !== 'authenticated') return;
-    fetch(`/api/users/${user.id}/follows/me`)
-      .then(r => r.json())
-      .then(d => setFollowing(Boolean(d.follows)))
-      .catch(console.error);
-  }, [status, user.id]);
+    if (!loggedIn) return
+    fetch(`/api/users/${user.username}/follow`)
+      .then(r => (r.ok ? r.json() : { following: false }))
+      .then(d => setFollowing(Boolean(d.following)))
+      .catch(console.error)
+  }, [loggedIn, user.username])
 
-  /* ------------------------------------------------------------ *
-   *  FOLLOW / UNFOLLOW                                           *
-   * ------------------------------------------------------------ */
-  const toggleFollow = async () => {
-    if (status !== 'authenticated') return;
-    const method = following ? 'DELETE' : 'POST';
-    const res = await fetch(`/api/users/${user.id}/follow`, { method });
-    if (!res.ok) return;
+  /** ───────────────── Seguir / deixar de seguir */
+  const toggleFollow = useCallback(async () => {
+    if (!loggedIn) return
+    const method = following ? 'DELETE' : 'POST'
+    const res = await fetch(`/api/users/${user.username}/follow`, { method })
+    if (!res.ok) return
 
-    setFollowing(!following);
+    // Atualiza estado local
+    setFollowing(!following)
     setUser(prev => ({
       ...prev,
-      followerIds: following
-        ? prev.followerIds.filter(id => id !== meId)
-        : [...prev.followerIds, meId!],
-    }));
-  };
+      followerUsernames: following
+        ? prev.followerUsernames.filter(u => u !== meUsername)
+        : [...prev.followerUsernames, meUsername!],
+    }))
+  }, [following, loggedIn, meUsername, user.username])
 
-  /* ------------------------------------------------------------ *
-   *  ADD COMMENT (incrementa commentsCount localmente)           *
-   * ------------------------------------------------------------ */
+  /** ───────────────── Comentários */
   const handleAddComment = async (postId: string, text: string) => {
     const res = await fetch(`/api/posts/${postId}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
-    });
-    if (!res.ok) return;
+    })
+    if (!res.ok) return
 
-    const newComment: CommentWithAuthor = await res.json();
+    const newComment: CommentWithAuthor = await res.json()
     setPosts(prev =>
       prev.map(p =>
         p.id === postId
           ? {
               ...p,
               comments: [...p.comments, newComment],
-              commentsCount: p.commentsCount + 1, // ✅ novo campo
+              commentCount: p.commentsCount + 1,
             }
           : p,
       ),
-    );
-  };
+    )
+  }
 
-  /* ------------------------------------------------------------ *
-   *  RENDER                                                      *
-   * ------------------------------------------------------------ */
   return (
     <section className="flex gap-6">
-      {/* — Lateral esquerda (vazia ou Sidebar) — */}
-      <aside className="w-64 hidden lg:block">{/* <Sidebar variant="main" /> */}</aside>
-
-      {/* — Conteúdo principal — */}
       <main className="flex-1 space-y-6">
-        {/* HEADER DO PERFIL */}
+        {/* Header do perfil */}
         <div className="flex flex-col md:flex-row items-center gap-4 border-b pb-4">
-          <Link href={`/profile/${user.id}`}>
+          <Link href={`/profile/${user.username}`}>
             <Image
-              src={user.avatarPath || '/assets/avatar_placeholder.svg'}
+              src={user.avatarPath || '/assets/images/users/default.jpg'}
               alt={user.name}
               width={96}
               height={96}
@@ -118,53 +109,36 @@ export default function ProfileShell({
             </p>
             <div className="flex gap-6 mt-2 text-sm">
               <span>
-                <strong>{user.followingIds.length}</strong> seguindo
+                <strong>{user.followingUsernames.length}</strong> seguindo
               </span>
               <span>
-                <strong>{user.followerIds.length}</strong> seguidores
+                <strong>{user.followerUsernames.length}</strong> seguidores
               </span>
             </div>
           </div>
 
-          {meId && meId !== user.id ? (
-            <Button size="sm" variant="default" onClick={toggleFollow}>
-              {following ? 'Deixar de seguir' : 'Seguir'}
-            </Button>
+          {loggedIn && meUsername && meUsername !== user.username ? (
+            <FollowButton
+              targetUsername={user.username}
+              initialFollowing={following}
+              onToggle={setFollowing}
+            />
           ) : (
-            meId === user.id && (
-              <Button
-                size="sm"
-                variant="default"
-                onClick={() => {
-                  /* abrir modal de edição */
-                }}
-              >
-                Editar perfil
-              </Button>
+            loggedIn && meUsername === user.username && (
+              <EditProfileButton onClick={() => {/* TODO */}} />
             )
           )}
+      
         </div>
 
-        {/* FEED DE POSTS */}
         {posts.length ? (
           posts.map(post => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onAddComment={handleAddComment}
-            />
+            <PostCard key={post.id} post={post} onAddComment={handleAddComment} />
           ))
         ) : (
-          <p className="text-center text-[var(--text-tertiary)]">
-            Nenhum post ainda.
-          </p>
+          <p className="text-center text-[var(--text-tertiary)]">Nenhum post ainda.</p>
         )}
       </main>
-
-      {/* — Lateral direita (recomendações) — */}
-      <aside className="w-64 hidden lg:block">
-        {/* <Sidebar variant="recommended" /> */}
-      </aside>
     </section>
-  );
+  )
 }

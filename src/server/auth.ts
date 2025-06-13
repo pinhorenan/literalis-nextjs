@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider      from 'next-auth/providers/credentials';
-import { PrismaAdapter }        from '@next-auth/prisma-adapter';
 import bcrypt                   from 'bcryptjs';
+import { PrismaAdapter }        from '@next-auth/prisma-adapter';
 import { prisma }               from '@server/prisma';
 
 export const authOptions: NextAuthOptions = {
@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
 
         // campos exigidos pelo seu módulo de tipagem
         return {
-          id         : user.id,
+          id         : user.username,
           name       : user.name,
           email      : user.email,
           image      : avatar,      // campo padrão do NextAuth
@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id         = user.id;
+        token.id         = user.username;
         token.username   = (user as any).username;
         token.avatarPath = (user as any).avatarPath;
         token.bio        = (user as any).bio;
@@ -77,4 +77,16 @@ export const authOptions: NextAuthOptions = {
 
   // ── Configuração do JWT ─────────────────────────────────────
   secret: process.env.NEXTAUTH_SECRET,
+
+  cookies: {
+    sessionToken: {
+      name: 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: false,
+      }
+    }
+  },
 };

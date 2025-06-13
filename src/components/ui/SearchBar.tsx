@@ -1,40 +1,25 @@
 // components/ui/SearchBar.tsx
-"use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { Button } from "@components/ui/Buttons";
-import { Search } from "lucide-react";
+'use client';
 
-interface Props {
-  value: string;
-  onChange: (v: string) => void;
-  onSearch: () => void;
-};
+import React from 'react';
+import { Search } from 'lucide-react';
 
-export function SearchBar({ value, onChange, onSearch }: Props) {
-  const handleSubmit = (e: FormEvent) => { e.preventDefault(); onSearch(); };
+export interface SearchBarProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    className?: string;
+}
 
-  return (
-    <form onSubmit={handleSubmit} className="relative w-full max-w-md">
-      <input
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder="Pesquisar..."
-        className="
-          w-full h-10 pl-4 pr-10 rounded
-          bg-[var(--surface-input)]
-          border border-[var(--border-subtle)]
-          text-[var(--text-primary)]
-          focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]
-        "
-      />
-      <Button
-        variant="icon"
-        icon={Search}
-        type="submit"
-        className="absolute right-2 top-1/2 -translate-y-1/2 opacitiy-60"
-        aria-label="Pesquisar"
-      />
-    </form>
-  )
+export function SearchBar({ className = '', ...props }: SearchBarProps) {
+    return (
+        <div
+            className={`flex items-center gap-2 bg-[var(--surface-input)] border border-[var(--border-base)] rounded-[var(--radius-md)] px-3 py-1 ${className}`}
+        >
+            <Search className="w-4 h-4 text-[var(--text-tertiary)]" />
+            <input
+                type="text"
+                className="flex-1 bg-transparent focus:outline-none text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)]"
+                {...props}
+            />
+        </div>
+    );
 }

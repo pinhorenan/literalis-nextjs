@@ -1,55 +1,63 @@
-// app/profile/[username]/page.tsx
-import { notFound } from '@server/http';
-import { prisma }       from '@server/prisma';
-import ProfileShell from '@components/profile/ProfileShell';
+// profile/[username]/page.tsx
+import ProfileShell from '@components/profile/ProfileShell'
+import { notFound } from 'next/navigation'
+import { prisma } from '@server/prisma'
 
-interface Props { params: { username: string } }
+export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
 
-export default async function UserProfile({ params }: Props) {
-  const dbUser = await prisma.user.findUnique({
-    where: { username: params.username },
+  const user = await prisma.user.findUnique({
+    where: { username },
     include: {
-      posts: { 
-        orderBy: { createdAt: 'desc' },
-        include: {
-          author: true,
-          book: true,
-          comments: { include: { author: true } }
-        },
-      }, 
-      followers: { select: { followerId: true } },
-      following: { select: { followedId: true } }
-    }
-  });
+      followers: { select: { followerUsername: true } },
+      following: { select: { followedUsername: true } },
+    },
+  })
 
-  if (!dbUser) return notFound();
+  if (!user) return notFound()
 
-  const {
-    id,
-    username,
-    name,
-    email,
-    avatarPath,
-    bio,
-    followers,
-    following,
-    posts
-  } = dbUser;
+  // Busca posts do usuário
+  const rawPosts = await prisma.post.findMany({
+    where: { authorUsername: username },
+    include: {
+      author: true,
+      book: true,
+      comments: { include: { author: true } },
+      likes: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  })
 
-  const initialUser = {
-    id,
-    username,
-    name,
-    email: email ?? undefined,
-    avatarPath: avatarPath ?? '/assets/images/users/default.jpg',
-    bio: bio ?? undefined,
-    followerIds: followers.map(f => f.followerId),
-    followingIds: following.map(f => f.followedId),
-  };
-
-  const initialPosts = posts;
+  // Mapeia para PostWithRelations
+  const posts = rawPosts.map(p => ({
+    id: p.postId,
+    authorId: p.authorUsername,
+    bookIsbn: p.bookIsbn,
+    excerpt: p.excerpt,
+    progressPct: p.progressPct,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+    commentsCount: p.commentCount,
+    reactionsCount: p.likeCount,
+    author: p.author,
+    book: p.book,
+    comments: p.comments,
+    likes: p.likes,
+    likedByMe: false,
+    isFollowingAuthor: false,
+  }))
 
   return (
-    <ProfileShell initialUser={initialUser} initialPosts={initialPosts} />
-  );
+    <ProfileShell
+      initialUser={{
+        username: user.username,
+        name: user.name,
+        avatarPath: user.avatarPath,
+        bio: user.bio ?? undefined,
+        followerUsernames: user.followers.map(f => f.followerUsername),
+        followingUsernames: user.following.map(f => f.followedUsername),
+      }}
+      initialPosts={posts}
+    />
+  )
 }

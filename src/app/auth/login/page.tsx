@@ -17,7 +17,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    // não deixamos o NextAuth redirecionar automaticamente
     const res = await signIn('credentials', {
       redirect: false,
       username,
@@ -26,12 +25,10 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      // exibe erro inline — nada de sair da página
       setError('Usuário ou senha inválidos.');
       return;
     }
 
-    // login OK → vamos para o feed
     router.push(res?.url ?? '/feed');
   }
 

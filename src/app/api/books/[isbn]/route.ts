@@ -1,10 +1,40 @@
 // api/books/[isbn]/route.ts
-import { prisma } from '@server/prisma'
-import { json, notFound, serverError } from '@server/http'
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@server/auth';
+import { prisma } from '@server/prisma';
 
-export async function GET(_: Request, { params }: { params: { isbn: string } }) {
-  try {
-    const book = await prisma.book.findUnique({ where: { isbn: params.isbn } })
-    return book ? json(book) : notFound('Livro não encontrado')
-  } catch (e) { console.error(e); return serverError() }
+export async function GET(req: NextRequest, context: { params: { isbn: string } }) {
+    const { isbn } = context.params;
+
+    const book = await prisma.book.findUnique({
+        where: { isbn: isbn },
+        include: { posts: true }
+    });
+    if (!book) return NextResponse.json({ error: 'Book not found' }, { status: 404 });
+    return NextResponse.json(book);
+}
+
+export async function PATCH(req: NextRequest, context: { params: { isbn: string } }) {
+    const { isbn } = context.params;
+
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    const data = await req.json();
+    const updated = await prisma.book.update({
+        where: { isbn: isbn },
+        data
+    });
+    return NextResponse.json(updated);
+}
+
+export async function DELETE(req: NextRequest, context: { params: { isbn: string } }) {
+    const { isbn } = context.params;
+
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    await prisma.book.delete({ where: { isbn: isbn } });
+    return NextResponse.json({ success: true });
 }
