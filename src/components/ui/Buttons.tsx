@@ -1,7 +1,7 @@
-// components/ui/Buttons.tsx
+// File: src/components/ui/Buttons.tsx
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -129,10 +129,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = 'Button'
 
-/** ------------------------------------------------------------------
- * Helper Buttons
- * ------------------------------------------------------------------*/
-
+/* ----- ThemeToggle ----- */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -151,38 +148,35 @@ export function ThemeToggle() {
   )
 }
 
-/** ------------------------------------------------------------------
- * FollowButton – lógica embutida
- * ------------------------------------------------------------------*/
+/* ----- FollowButton ----- */ 
 interface FollowButtonProps {
   targetUsername: string;
   initialFollowing?: boolean;
   onToggle?: (nowFollowing: boolean) => void;
   size?: ButtonSize;
 }
-
-export function FollowButton({ 
-  targetUsername, 
-  initialFollowing = false, 
-  onToggle, 
-  size = 'sm',
- }: FollowButtonProps) {
+export function FollowButton({ targetUsername, initialFollowing = false, onToggle, size = 'sm' }: FollowButtonProps) {
   const { following, toggleFollow, loading, loggedIn } = useFollow(targetUsername, initialFollowing);
+  const [hover, setHover] = useState(false);
 
   useEffect(() => { onToggle?.(following); }, [following, onToggle]);
+
+  const label = following ? (hover ? 'Deixar de seguir' : 'Seguindo') : 'Seguir';
 
   return (
     <Button
       size={size}
       onClick={toggleFollow}
       disabled={!loggedIn || loading}
-      className="hover:bg-red-900"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      {following ? 'Seguindo' : 'Seguir'}
+      {label}
     </Button>
   );
 }
 
+/** EditProfileButton */
 export function EditProfileButton(props: ButtonProps) {
   return (
     <Button variant="default" size="sm" {...props}>

@@ -1,4 +1,4 @@
-// components/feed/FeedSwitch.tsx
+// File: src/components/feed/FeedSwitch.tsx
 'use client';
 
 import { useState } from 'react';

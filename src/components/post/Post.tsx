@@ -1,89 +1,92 @@
+// File: src/components/post/Post.tsx
 'use client';
 
 import Link from 'next/link';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Heart, MessageCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { FollowButton } from '@components/ui/Buttons';
-import { relativeTime } from '@hooks/relativeTime';
 import { BookCover } from '@components/book/BookCover';
 import { BookInfo } from '@components/book/BookInfo';
 
-import type { User, Book, Comment } from '@prisma/client';
+import { relativeTime } from '@hooks/relativeTime';
+import { usePostLike } from '@hooks/usePostLike';
+import { useComments, type Comment } from '@hooks/useComments';
 
-/* ───── Tipos ────────────────────────────────────────────────────────── */
-export type CommentWithAuthor = Comment & { author: User };
+import type { User, Book, Comment as PrismaComment } from '@prisma/client';
+
+export type CommentWithAuthor = PrismaComment & { id: string, author: User };
 
 export interface PostWithRelations {
   id: string;
-  authorId: string;
-  bookIsbn: string;
   excerpt: string;
   progressPct: number;
   createdAt: Date;
   updatedAt: Date;
   commentsCount: number;
   reactionsCount: number;
+  likedByMe: boolean;
+  isFollowingAuthor: boolean;
   author: User;
   book: Book;
   comments: CommentWithAuthor[];
-  likedByMe: boolean;
-  isFollowingAuthor: boolean;
 }
 
-/* ───── Componente ───────────────────────────────────────────────────── */
 interface Props {
   post: PostWithRelations;
-  onAddComment: (postId: string, text: string) => void;
 }
 
-export function PostCard({ post, onAddComment }: Props) {
+export function PostCard({ post }: Props) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const me = session?.user;
 
-  /* ---------- refs + state ---------- */
-  const inputRef = useRef<HTMLInputElement>(null);
+  // hook de curtir/descurtir
+  const {
+    liked,
+    likeCount,
+    loading: likeLoading,
+    toggleLike,
+  } = usePostLike(post.id, post.likedByMe, post.reactionsCount);
 
-  const [liked, setLiked] = useState<boolean>(post.likedByMe);
-  const [likeCount, setLikeCount] = useState<number>(post.reactionsCount);
-  const [following, setFollowing] = useState<boolean>(post.isFollowingAuthor);
-  const [draft, setDraft] = useState<string>('');
+  // hook de comentários
+  const {
+    comments,
+    loading: commentLoading,
+    addComment,
+  } = useComments(post.id, post.comments as Comment[]);
+
+  // estados de UI
+  const [draft, setDraft] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
-
+  const inputRef = useRef<HTMLInputElement>(null);
+  
   const displayedComments = showAllComments
     ? post.comments
     : post.comments.slice(0, 3);
 
-  /* ---------- handlers ---------- */
-  const toggleLike = async () => {
-    if (status !== 'authenticated') return router.push('/login');
-    const method = liked ? 'DELETE' : 'POST';
-    const res = await fetch(`/api/posts/${post.id}/likes`, { 
-        method, 
-        credentials: 'include',
-    });
-    if (res.ok) {
-      setLiked(!liked);
-      setLikeCount((c) => c + (liked ? -1 : 1));
+  const handleToggleLike = useCallback(() => {
+    if (status !== 'authenticated') {
+      router.push('/auth/login');
+    } else {
+      toggleLike();
     }
-  };
+  }, [status, router, toggleLike]);
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     const text = draft.trim();
     if (!text) return inputRef.current?.focus();
-    onAddComment(post.id, text);
+    addComment(text);
     setDraft('');
     inputRef.current?.focus();
-  };
+  }, [draft, addComment]);
 
-  /* ---------- JSX ---------- */
   return (
     <article className="overflow-hidden max-w-[700px] border-b border-[var(--border-base)]">
+      { /* Cabeçalho do post com livro e autor */}
       <div className="flex flex-col md:flex-row p-4">
         <div className="flex flex-row gap-4 basis-4/7 border-r border-[var(--border-base)]">
           <BookCover
@@ -126,11 +129,10 @@ export function PostCard({ post, onAddComment }: Props) {
               </div>
             </div>
 
-            {me?.username !== post.authorId && (
+            {session?.user.username !== post.author.username && (
               <FollowButton
-                targetUsername={post.authorId}
-                initialFollowing={following}
-                onToggle={setFollowing}
+                targetUsername={post.author.username}
+                initialFollowing={post.isFollowingAuthor}
                 size="sm"
               />
             )}
@@ -152,8 +154,13 @@ export function PostCard({ post, onAddComment }: Props) {
         </div>
       </div>
 
+      {/* Ações do post */}
       <div className="flex items-center border-y border-[var(--border-base)] gap-4 px-4 py-2">
-        <button onClick={toggleLike} className="flex items-center gap-1">
+        <button 
+          onClick={handleToggleLike}
+          disabled={likeLoading} 
+          className="flex items-center gap-1"
+        >
           <Heart
             className={clsx(
               'cursor-pointer transition-colors',
@@ -165,6 +172,7 @@ export function PostCard({ post, onAddComment }: Props) {
 
         <button
           onClick={handleComment}
+          disabled={commentLoading}
           className="flex items-center gap-1"
           title="Enviar comentário"
         >
@@ -183,10 +191,11 @@ export function PostCard({ post, onAddComment }: Props) {
         />
       </div>
 
+      {/* Lista de comentários */}
       <div className="px-4 py-2 space-y-3">
-        {displayedComments.length ? (
+        {displayedComments.length > 0 ? (
           displayedComments.map((c) => (
-            <div key={c.commentId} className="flex items-center gap-2">
+            <div key={c.id} className="flex items-center gap-2">
               <Image
                 src={c.author.avatarPath || '/assets/images/users/default.jpg'}
                 alt={c.author.name}
@@ -195,7 +204,9 @@ export function PostCard({ post, onAddComment }: Props) {
                 className="rounded-full"
               />
               <div className="flex-1 text-sm">
+                <Link href={`/profile/${c.author.username}`}>
                 <strong>{c.author.name}:</strong> {c.text}
+                </Link>
               </div>
               <time className="text-xs text-[var(--text-tertiary)]">
                 {relativeTime(c.createdAt)}
@@ -208,7 +219,7 @@ export function PostCard({ post, onAddComment }: Props) {
           </p>
         )}
 
-        {post.comments.length > 2 && !showAllComments && (
+        {comments.length > 3 && !showAllComments && (
           <button
             className="text-sm text-[var(--text-primary)] hover:underline block mx-auto"
             onClick={() => setShowAllComments(true)}
@@ -216,7 +227,6 @@ export function PostCard({ post, onAddComment }: Props) {
             <strong>Ver mais comentários ({post.comments.length - 3})</strong>
           </button>
         )}
-
         {showAllComments && (
           <button
             className="text-sm text-[var(--text-primary)] hover:underline block mx-auto"

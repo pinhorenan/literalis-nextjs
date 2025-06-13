@@ -7,7 +7,7 @@ export interface Comment {
     id: string;
     author: { username: string; avatarPath?: string };
     text: string;
-    createdAt: string;
+    createdAt: Date;
 }
 
 interface UseCommentsReturn {

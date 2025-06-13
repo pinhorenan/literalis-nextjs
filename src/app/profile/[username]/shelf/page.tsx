@@ -6,7 +6,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import { useSession } from 'next-auth/react';
 import { Button } from '@components/ui/Buttons';
-import { SearchBar } from '@components/ui/SearchBar';
+import { SearchBar } from '@/src/components/search/SearchBar';
 import { BookCard } from '@components/book/BookCard';
 import { Grid, List, BookOpen }  from 'lucide-react';
 import type { Book } from '@prisma/client';
