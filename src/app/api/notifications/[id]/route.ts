@@ -4,11 +4,16 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@server/auth';
 import { prisma } from '@server/prisma';
 
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
-    const { id } = context.params;
+export async function PATCH(
+    req: NextRequest, 
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
 
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    } 
 
     const notif = await prisma.notification.findUnique({ where: { id: id } });
     if (!notif || notif.userUsername !== session.user.username) {
@@ -19,13 +24,20 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         where: { id: id },
         data: { readAt: new Date() }
     });
+
+    return NextResponse.json(updated);
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-    const { id } = context.params;
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
     
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    } 
 
     const notif = await prisma.notification.findUnique({ where: { id: id } });
     if (!notif || notif.userUsername !== session.user.username) {
@@ -33,5 +45,6 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
     }
 
     await prisma.notification.delete({ where: { id: id } });
+    
     return NextResponse.json({ success: true });
 }

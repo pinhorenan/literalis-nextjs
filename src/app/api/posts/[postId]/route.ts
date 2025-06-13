@@ -4,8 +4,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@server/auth';
 import { prisma } from '@server/prisma';
 
-export async function GET(req: NextRequest, context: { params: { postId: string } }) {
-    const { postId } = context.params;
+export async function GET(
+    req: NextRequest, 
+    { params }: { params: Promise<{ postId: string }> }
+) {
+    const { postId } = await params;
 
     const post = await prisma.post.findUnique({
         where: { postId: postId },
@@ -16,16 +19,28 @@ export async function GET(req: NextRequest, context: { params: { postId: string 
             likes: { select: { username: true } }
         }
     });
-    if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+
+    if (!post) {
+        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    } 
+        
     return NextResponse.json(post);
 }
 
-export async function PATCH(req: NextRequest, context: { params: { postId: string } }) {
-    const { postId } = context.params;
+export async function PATCH(
+    req: NextRequest, 
+    { params }: { params: Promise<{ postId: string }> }
+) {
+    const { postId } = await params;
     
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const existing = await prisma.post.findUnique({ where: { postId: postId } });
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    } 
+    
+    const existing = await prisma.post.findUnique(
+        { where: { postId: postId } }
+    );
     if (!existing || existing.authorUsername !== session.user.username) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -35,19 +50,28 @@ export async function PATCH(req: NextRequest, context: { params: { postId: strin
         where: { postId: postId },
         data: { excerpt, progressPct }
     });
+    
     return NextResponse.json(updated);
 }
 
-export async function DELETE(req: NextRequest, context: { params: { postId: string } }) {
-    const { postId } = context.params;
+export async function DELETE(
+    req: NextRequest, 
+    { params }: { params: Promise<{ postId: string }> }
+) {
+    const { postId } = await params;
     
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const existing = await prisma.post.findUnique({ where: { postId: postId } });
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    } 
+    const existing = await prisma.post.findUnique(
+        { where: { postId: postId } }
+    );
     if (!existing || existing.authorUsername !== session.user.username) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     await prisma.post.delete({ where: { postId: postId } });
+    
     return NextResponse.json({ success: true });
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@components/ui/Buttons';
-import { SearchBar } from "@components/ui/SearchBar";
+import { SearchBar } from "@/src/components/search/SearchBar";
 
 const resources = ['books', 'posts', 'users'] as const;
 type Resource = typeof resources[number];
