@@ -16,7 +16,7 @@ export function UserSummary() {
     const user      = session?.user;
     
     const name      = user?.name ?? 'Visitante';
-    const imageSrc  = user?.image ?? '/assets/images/users/default.jpg';
+    const imageSrc  = user?.image ?? '/assets/images/users/system.jpg';
 
     return (
         <div className="flex items-center gap-3">

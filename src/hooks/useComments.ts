@@ -2,17 +2,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-
-export interface ClientComment {
-  id: string;
-  content: string;
-  createdAt: string; // padrão JSON (ISO)
-  author: {
-    username: string;
-    name?: string;
-    avatarUrl?: string;
-  };
-}
+import { useSession } from 'next-auth/react';
+import type { ClientComment } from '@/src/types/posts';
 
 interface UseCommentsReturn {
   comments: ClientComment[];
@@ -29,6 +20,7 @@ export function useComments(
   postId: string,
   initialComments: ClientComment[] = []
 ): UseCommentsReturn {
+  const { data: session } = useSession();
   const [comments, setComments] = useState<ClientComment[]>(initialComments);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +30,25 @@ export function useComments(
       if (loading || !trimmed) return;
 
       setLoading(true);
+
+      const username = session?.user?.username || 'me';
+      const name = session?.user?.name;
+      const avatarUrl = session?.user?.image;
+
+      const tempId = `temp-${Date.now()}`
+      const tempComment: ClientComment = {
+        id: tempId,
+        content: trimmed,
+        createdAt: new Date().toISOString(),
+        author: {
+          username: username,
+          name: name,
+          avatarUrl: avatarUrl,
+        },
+      };
+
+      setComments((prev) => [...prev, tempComment])
+
       try {
         const res = await fetch(`/api/posts/${postId}/comments`, {
           method: 'POST',
@@ -48,10 +59,14 @@ export function useComments(
 
         if (!res.ok) throw new Error(await res.text());
 
-        const newComment: ClientComment = await res.json();
-        setComments((prev) => [...prev, newComment]);
+        const savedComment: ClientComment = await res.json();
+
+        setComments((prev) =>
+          prev.map((c) => (c.id === tempId ? savedComment : c))
+        );        
       } catch (err) {
         console.error('Erro ao adicionar comentário:', err);
+        setComments((prev) => prev.filter((c) => c.id !== tempId));
       } finally {
         setLoading(false);
       }

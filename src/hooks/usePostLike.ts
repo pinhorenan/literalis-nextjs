@@ -12,12 +12,12 @@ interface UsePostLikeReturn {
 
 /**
  * Hook que encapsula lógica de curtir/descurtir um post.
- * @param postId ID do post
+ * @param id ID do post
  * @param initiallyLiked estado inicial (feed)
  * @param initialCount contagem inicial de likes
  */
 export function usePostLike(
-  postId: string,
+  id: string,
   initiallyLiked: boolean,
   initialCount: number
 ): UsePostLikeReturn {
@@ -32,7 +32,7 @@ export function usePostLike(
 
     try {
       const method = liked ? 'DELETE' : 'POST';
-      const res = await fetch(`/api/posts/${postId}/likes`, {
+      const res = await fetch(`/api/posts/${id}/likes`, {
         method,
         credentials: 'include',
       });
@@ -50,7 +50,7 @@ export function usePostLike(
     } finally {
       setLoading(false);
     }
-  }, [liked, likeCount, loading, postId]);
+  }, [liked, likeCount, loading, id]);
 
   return { liked, likeCount, loading, toggleLike };
 }

@@ -16,14 +16,14 @@ export const metadata: Metadata = {
 };
 
 export default async function ShelfPage({ params }: ShelfPageProps) {
-  const { username } =  await params;
+  const { username } =  params;
 
   const session = await getServerSession(authOptions);
   const me = session?.user?.username;
   const isOwner = !!me && me === username;
 
   const shelfItems = await prisma.userBook.findMany({
-    where: { userUsername: username }, // campo correto!
+    where: { userUsername: username },
     include: {
       book: {
         select: {
@@ -49,12 +49,12 @@ export default async function ShelfPage({ params }: ShelfPageProps) {
   }));
 
   return (
-    <main className="w-full h-full p-4">
+    <section className="py-6 space-y-6">
       <BookshelfClient
         initialItems={initialItems}
         username={username}
         isOwner={isOwner}
       />
-    </main>
+    </section>
   );
 }

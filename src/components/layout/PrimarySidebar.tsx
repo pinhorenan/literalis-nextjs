@@ -2,9 +2,9 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { User, Users, Globe, BookOpen, Search, MessageSquare, Bell } from 'lucide-react';
+import { User, Users, Globe, BookOpen, Search, MessageSquare, Bell, LogIn, Home } from 'lucide-react';
 
-import { SidebarShell } from '@components/sidebar/SidebarShell';
+import { SidebarShell } from '@/src/components/layout/SidebarShell';
 import { LogoutMenu } from '@components/ui/LogoutMenu';
 import { Button, LogoButton } from '@components/ui/Buttons';
 
@@ -17,21 +17,22 @@ interface NavItem {
 export default function PrimarySidebar() {
   const { data: session } = useSession();
   const username = session?.user?.username;
-
+  
   const nav: NavItem[] = [
-    ...(username
-      // todo: adicionar aqui um item de home que redireciona para o feed e fica no topo.
-      ? [{ label: 'Perfil', icon: User, href: `/profile/${username}` }]
-      : []),
-    { label: 'Amigos', icon: Users, href: '/friends' }, // todo: implementar página amigos
-    { label: 'Explorar', icon: Globe, href: '/feed' },
-    ...(username
-      ? [{ label: 'Estante', icon: BookOpen, href: `/profile/${username}/shelf/` }]
-      : []),
-    { label: 'Pesquisar', icon: Search, href: '/search' }, // todo: implementar pesquisa
-    { label: 'Notificações', icon: Bell, href: '/notifications' }, // todo: implementar notificações
-    { label: 'Mensagens', icon: MessageSquare, href: '/message' }, // todo: implementar mensagens
-    // todo: adicionar item de novo livro ou algo similar (novo post?)
+          { label: 'Início',        icon: Home,           href: '/feed' },
+          { label: 'Pesquisar',     icon: Search,         href: '/search' },
+        ...(username
+        ? [ 
+          { label: 'Perfil',        icon: User,           href: `/profile/${username}`        },
+          { label: 'Estante',       icon: BookOpen,       href: `/profile/${username}/shelf/` },
+          { label: 'Amigos',        icon: Users,          href: '/friends'                    },
+          { label: 'Mensagens',     icon: MessageSquare,  href: '/message'                    },
+          { label: 'Notificações',  icon: Bell,           href: '/notifications'              },
+          ]
+        : [ 
+          { label: 'Entrar',        icon: LogIn,          href: '/signin'                      } 
+          ]
+        ),
   ];
 
   return (
@@ -52,8 +53,10 @@ export default function PrimarySidebar() {
             </Button>
           ))}
         </nav>
-
-        <LogoutMenu />
+          
+        
+        {/* Colocoar condicional para estar logado */}
+        <LogoutMenu /> 
       </div>
     </SidebarShell>
   );

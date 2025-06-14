@@ -33,7 +33,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   });
 
   const posts: ClientPost[] = rawPosts.map((p) => ({
-    postId:             p.id,
+    id:                 p.id,
     excerpt:            p.excerpt,
     progress:           p.progress,
     createdAt:          p.createdAt.toISOString(),

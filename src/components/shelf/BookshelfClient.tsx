@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import clsx from 'clsx';
-import { SearchBar } from '@components/search/SearchBar';
+import { SearchBar } from '@/src/components/ui/SearchBar';
 import { Button } from '@components/ui/Buttons';
 import { Grid, List, SortAsc, SortDesc } from 'lucide-react';
 import ShelfItem from '@components/shelf/ShelfItem';

@@ -9,16 +9,16 @@ import { useSession } from 'next-auth/react';
  * @param targetUsername username do alvo
  * @param initiallyFollowing opcional - estado já conhecido (evita 1ª requisição)
  */
-export function useFollow(targetUsername: string, initiallyFollowing = false) {
+export function useFollow(targetUsername: string, initiallyFollowing?: boolean) {
   const { data: session, status } = useSession();
   const loggedIn = status === 'authenticated';
   const currentUser = session?.user?.username;
-  const [following, setFollowing] = useState(initiallyFollowing);
+  const [following, setFollowing] = useState(initiallyFollowing ?? false);
   const [loading, setLoading] = useState(false);
 
-  // Descobre se segue, na montagem
+  // Busca se está seguindo, apenas se `initiallyFollowing` for indefinido
   useEffect(() => {
-    if (!loggedIn || initiallyFollowing || currentUser === targetUsername) return;
+    if (!loggedIn || typeof initiallyFollowing === 'boolean' || currentUser === targetUsername) return;
 
     let aborted = false;
 
@@ -54,7 +54,9 @@ export function useFollow(targetUsername: string, initiallyFollowing = false) {
         method,
         credentials: 'include',
       });
-      if (res.ok) setFollowing(prev => !prev);
+      if (res.ok) {
+        setFollowing((prev) => !prev);
+      }
     } catch (err) {
       console.error('Erro ao alternar follow:', err);
     } finally {
@@ -64,3 +66,4 @@ export function useFollow(targetUsername: string, initiallyFollowing = false) {
 
   return { following, toggleFollow, loading, loggedIn };
 }
+

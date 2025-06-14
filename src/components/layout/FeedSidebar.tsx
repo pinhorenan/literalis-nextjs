@@ -1,7 +1,7 @@
 // File: src/components/sidebar/FeedSidebar.tsx
 'use client';
 
-import { SidebarShell } from '@components/sidebar/SidebarShell';
+import { SidebarShell } from '@/src/components/layout/SidebarShell';
 import { UserSummary } from '@components/ui/UserSummary';
 import { Button } from '@components/ui/Buttons';
 import { BookOpen } from 'lucide-react';

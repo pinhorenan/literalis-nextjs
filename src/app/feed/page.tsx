@@ -1,8 +1,8 @@
 // File: src/app/feed/page.tsx
-import FeedClient                 from '@components/feed/FeedClient';
-import { prisma }                 from '@server/prisma';
+import FeedClient                   from '@components/feed/FeedClient';
+import { prisma }                   from '@server/prisma';
+import { mapRawToClientPost }       from '@lib/mapPost';
 import type { RawPost, ClientPost } from '../../types/posts';
-import { mapRawToClientPost } from '@lib/mapPost';
 
 export default async function PageFeed() {
   const rawPosts = await prisma.post.findMany({
@@ -18,5 +18,9 @@ export default async function PageFeed() {
 
   const initialPosts: ClientPost[] = rawPosts.map(mapRawToClientPost);
 
-  return <FeedClient initialPosts={initialPosts} initialTab="discover" />
+  return (
+    <>
+      <FeedClient initialPosts={initialPosts} initialTab="discover" />
+    </>
+  );
 }

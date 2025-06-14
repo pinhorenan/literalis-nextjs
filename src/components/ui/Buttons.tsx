@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, Users } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useFollow } from '@hooks/useFollow'
 
@@ -148,33 +148,56 @@ export function ThemeToggle() {
   )
 }
 
-/* ----- FollowButton ----- */ 
 interface FollowButtonProps {
   targetUsername: string;
   initialFollowing?: boolean;
   onToggle?: (nowFollowing: boolean) => void;
   size?: ButtonSize;
+  variant?: ButtonVariant;
+  className?: string;
+  children?: React.ReactNode;
 }
-export function FollowButton({ targetUsername, initialFollowing = false, onToggle, size = 'sm' }: FollowButtonProps) {
-  const { following, toggleFollow, loading, loggedIn } = useFollow(targetUsername, initialFollowing);
+
+export function FollowButton({ 
+  targetUsername, 
+  initialFollowing = false, 
+  onToggle, 
+  size,
+  className,
+  variant,
+  children
+}: FollowButtonProps) {
+  const { following, toggleFollow: toggleRaw, loading, loggedIn } = useFollow(
+    targetUsername, 
+    initialFollowing
+  );
   const [hover, setHover] = useState(false);
 
-  useEffect(() => { onToggle?.(following); }, [following, onToggle]);
+  const handleToggle = async () => {
+    const newFollowing = !following;
+    await toggleRaw();
+    onToggle?.(newFollowing);
+  };
 
-  const label = following ? (hover ? 'Deixar de seguir' : 'Seguindo') : 'Seguir';
+  const label = following
+    ? (hover ? 'Deixar de seguir' : 'Seguindo')
+    : 'Seguir';
 
   return (
     <Button
       size={size}
-      onClick={toggleFollow}
+      onClick={handleToggle}
       disabled={!loggedIn || loading}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      variant={variant}
+      className={className}
     >
-      {label}
+      <Users size={16}/> {label}
     </Button>
   );
 }
+
 
 /** EditProfileButton */
 export function EditProfileButton(props: ButtonProps) {

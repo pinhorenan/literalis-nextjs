@@ -1,4 +1,4 @@
-// File: src/app/api/posts/[postId]/route.ts
+// File: src/app/api/posts/[post]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@server/auth';
@@ -6,13 +6,13 @@ import { prisma } from '@server/prisma';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { postId } = await params;
+  const { id } = await params;
 
   const [post, likeCount] = await Promise.all([
     prisma.post.findUnique({
-      where: { id: postId },
+      where: { id },
       include: {
         author: true,
         book: true,
@@ -24,7 +24,7 @@ export async function GET(
         },
       },
     }),
-    prisma.like.count({ where: { postId } }), // ✅ likeCount em tempo real
+    prisma.like.count({ where: { postId: id } }),
   ]);
 
   if (!post) {
@@ -33,15 +33,15 @@ export async function GET(
 
   return NextResponse.json({
     ...post,
-    likeCount, // ✅ incluído no retorno
+    likeCount,
   });
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { postId } = await params;
+  const { id } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -49,7 +49,7 @@ export async function PATCH(
   }
 
   const existing = await prisma.post.findUnique({
-    where: { id: postId },
+    where: { id },
   });
 
   if (!existing || existing.authorUsername !== session.user.username) {
@@ -59,7 +59,7 @@ export async function PATCH(
   const { excerpt, progress } = await req.json();
 
   const updated = await prisma.post.update({
-    where: { id: postId },
+    where: { id },
     data: { excerpt, progress },
   });
 
@@ -68,9 +68,9 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { postId } = await params;
+  const { id } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -78,7 +78,7 @@ export async function DELETE(
   }
 
   const existing = await prisma.post.findUnique({
-    where: { id: postId },
+    where: { id },
   });
 
   if (!existing || existing.authorUsername !== session.user.username) {
@@ -86,7 +86,7 @@ export async function DELETE(
   }
 
   await prisma.post.delete({
-    where: { id: postId },
+    where: { id },
   });
 
   return NextResponse.json({ success: true });

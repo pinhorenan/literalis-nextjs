@@ -3,9 +3,11 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { FeedSwitch, type Tab } from '@components/ui/FeedSwitch';
-import { PostCard, PostCardSkeleton } from '@components/post/Post';
-import type { ClientPost } from '@/src/types/posts';
+import { FeedSwitch, type Tab } from '@components/feed/FeedSwitch';
+import { PostCard }         from '@components/post/Post';
+import NewPostForm          from '@components/post/NewPostForm';
+import PostSkeleton         from '@components/post/PostSkeleton';
+import type { ClientPost }  from '@/src/types/posts';
 
 const fetcher = (url: string) =>
   fetch(url, { credentials: 'include' })
@@ -29,6 +31,17 @@ export default function FeedClient({ initialPosts, initialTab }: FeedClientProps
 
   const [tab, setTab] = useState<Tab>(initialTab);
   const mode = tab === 'friends' ? 'friends' : 'discover';
+  const [followedMap, setFollowedMap] = useState(() => {
+    const map: Record<string, boolean> = {};
+    for (const post of initialPosts) {
+      map[post.author.username] = post.isFollowingAuthor;
+    }
+    return map;
+  })
+
+  const updateFollowedMap = (username: string, isFollowing: boolean) => {
+    setFollowedMap((prev) => ({ ...prev, [username]: isFollowing }));
+  }
 
   const { data, error, isLoading } = useSWR<FeedResponse>(
     `/api/feed?mode=${mode}&limit=20`, // ? adicionar paginação OU scroll infinito
@@ -41,11 +54,14 @@ export default function FeedClient({ initialPosts, initialTab }: FeedClientProps
   const posts = data?.posts ?? [];
 
   return (
-    <main className="flex flex-col gap-4">
+    <section className="flex flex-col gap-4">
+
+      <NewPostForm />
+
       <FeedSwitch onChange={setTab} />
 
       {isLoading ? (
-        <PostCardSkeleton /> // ! o skeleton está aparecendo com o width "mínimo"
+        <PostSkeleton />
       ) : error ? (
         <p className="text-center text-red-500">{(error as Error).message}</p>
       ) : posts.length === 0 ? (
@@ -53,8 +69,16 @@ export default function FeedClient({ initialPosts, initialTab }: FeedClientProps
           Não há posts para exibir.
         </p>
       ) : (
-        posts.map((post) => <PostCard key={post.postId} post={post} />)
+        posts.map((post) => 
+        <PostCard 
+        key={post.id} 
+        post={{
+          ...post,
+          isFollowingAuthor: followedMap[post.author.username] ?? false,
+        }} 
+        onFollowChange={(nowFollowing) => updateFollowedMap(post.author.username, nowFollowing)}
+        />)
       )}
-    </main>
+    </section>
   );
 }

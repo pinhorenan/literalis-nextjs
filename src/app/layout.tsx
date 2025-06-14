@@ -36,7 +36,7 @@ export default async function RootLayout({
       >
         <Providers session={session}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <div className="bg-[var(--surface-bg) min-h-screen">
+            <div className="bg-[var(--surface-bg) min-h-screen overflow-x-hidden">
               {children}
             </div>
           </ThemeProvider>

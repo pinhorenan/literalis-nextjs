@@ -18,14 +18,14 @@ export type ClientComment = {
   createdAt: string;
   author: {
     username: string;
-    name: string;
-    avatarUrl: string;
+    name?: string;
+    avatarUrl?: string;
   };
 };
 
 /** Post processado para o frontend */
 export type ClientPost = {
-  postId: string;
+  id: string;
   excerpt: string;
   progress: number;
   createdAt: string;

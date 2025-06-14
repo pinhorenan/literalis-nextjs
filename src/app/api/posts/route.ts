@@ -1,4 +1,5 @@
 // File: src/app/api/posts/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@server/auth';
@@ -16,14 +17,14 @@ export async function GET(req: NextRequest) {
         select: {
           username: true,
           name: true,
-          avatarUrl: true, // ✅ atualizado
+          avatarUrl: true,
         },
       },
       book: {
         select: {
           isbn: true,
           title: true,
-          coverUrl: true, // ✅ atualizado
+          coverUrl: true,
         },
       },
     },
@@ -38,11 +39,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { bookIsbn, excerpt, progress } = await req.json(); // ✅ 'progress' agora
+  const { bookIsbn, excerpt, progress } = await req.json();
 
   const post = await prisma.post.create({
     data: {
-      authorUsername: session.user.username, // ✅ nome do campo permanece 'authorUsername' no schema
+      authorUsername: session.user.username,
       bookIsbn,
       excerpt,
       progress,
