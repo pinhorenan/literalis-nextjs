@@ -42,6 +42,7 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
             return;
         }
         onSave({ name, bio, avatarPath });
+        
         onClose();
     };
 

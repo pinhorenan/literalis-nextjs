@@ -1,14 +1,13 @@
-// app/layout.tsx
-import React                from  'react';
+// File: src/app/layout.tsx
+
 import type { Metadata }    from  'next';
 import { getServerSession } from  'next-auth';
-
 import { authOptions }      from  '@server/auth';
 
-import ThemeProvider        from  '@app/theme-provider';
-import Providers            from  '@app/providers';
-
 import '@styles/globals.css';
+
+import Providers            from  '@app/providers';
+import ThemeProvider        from  '@app/theme-provider';
 
 export const metadata: Metadata = {
   title: 'Literalis',
@@ -19,15 +18,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ 
+  children, 
+}: { 
+  children: React.ReactNode }
+) {
   const session = await getServerSession(authOptions);
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className="min-h-screen min-w-screen font-sans antialiased bg-[var(--surface-base)] text-[var(--text-primary)]">
+      <body 
+        className="
+          min-h-screen min-w-screen 
+          font-sans antialiased 
+          selection:bg-[var(--surface-base)] selection:text-[var(--text-primary)]
+        "
+      >
         <Providers session={session}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <div className="bg-[var(--surface-bg)">
+            <div className="bg-[var(--surface-bg) min-h-screen">
               {children}
             </div>
           </ThemeProvider>

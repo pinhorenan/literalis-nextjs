@@ -1,15 +1,15 @@
-// app/profile/[username]/shelf/layout.tsx
-'use client';
+// app/profile/layout.tsx
 
 import { ReactNode } from 'react';
-import { MainSidebar, RecommendedSidebar } from '@components/layout/Sidebar';
+import { PrimarySidebar } from '@components/sidebar/PrimarySidebar';
+import { FeedSidebar } from '@components/sidebar/FeedSidebar';
 
-export default function ShelfLayout({ children }: { children: ReactNode }) {
+export default function ProfileLayout({ children }: { children: ReactNode }) {
   return (
-    <section className="flex gap-4">
-      <MainSidebar />
-      <main className="flex-1 px-4 py-6 space-y-6">{children}</main>
-      <RecommendedSidebar />
-    </section>
+    <>
+      <PrimarySidebar/>
+      {children}
+      <FeedSidebar />
+    </>
   );
 }

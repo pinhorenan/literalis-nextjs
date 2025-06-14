@@ -1,5 +1,5 @@
-// profile/[username]/page.tsx
-import ProfileShell from '@components/profile/ProfileShell'
+// File: src/app/profile/[username]/page.tsx
+import ProfileShell from '@components/layout/ProfileShell'
 import { notFound } from 'next/navigation'
 import { prisma } from '@server/prisma'
 
@@ -41,7 +41,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     reactionsCount: p.likeCount,
     author: p.author,
     book: p.book,
-    comments: p.comments,
+    comments: p.comments.map(c => ({
+      ...c,
+      id: c.commentId,
+    })),
     likes: p.likes,
     likedByMe: false,
     isFollowingAuthor: false,

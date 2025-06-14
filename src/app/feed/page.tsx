@@ -5,7 +5,8 @@ import { useState   } from 'react';
 import { useSession } from 'next-auth/react';
 import { useFeed } from '@hooks/useFeed';
 
-import { MainSidebar, RecommendedSidebar }  from '@components/layout/Sidebar';
+import { PrimarySidebar   } from '@components/sidebar/PrimarySidebar';
+import { FeedSidebar      } from '@components/sidebar/FeedSidebar';
 import { PostCard, PostCardSkeleton }       from '@components/post/Post';
 import { FeedSwitch, type Tab }             from '@components/ui/FeedSwitch';
 
@@ -19,7 +20,7 @@ export default function PageFeed() {
 
   return (
     <section className="flex gap-4">
-      <MainSidebar />
+      <PrimarySidebar />
 
       <main className="px-4 py-6 space-y-6 mx-auto flex-1 max-w-[700px]">
         <FeedSwitch onChange={(t) => setTab(t)} />
@@ -37,7 +38,7 @@ export default function PageFeed() {
         )}
       </main>
 
-      <RecommendedSidebar />
+      <FeedSidebar />
     </section>
   )
 }

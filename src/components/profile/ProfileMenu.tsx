@@ -3,7 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { signOut } from 'next-auth/react';
-import useClickOutside from '@hooks/useClickOutside';
+import { useClickOutside } from '@hooks/useClickOutside';
 
 type MenuItem = { label: string; onClick: () => void };
 

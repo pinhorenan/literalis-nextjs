@@ -1,4 +1,4 @@
-// components/book/BookCard.tsx
+// File: src/components/book/BookCard.tsx
 'use client';
 
 import { BookCover, BookCoverSkeleton } from '@components/book/BookCover';
@@ -9,7 +9,7 @@ export function BookCard({ book }: { book: Book }) {
     return (
       <div
         className="
-          flex gap-5 p-4 rounded-md border border-[var(--border-base)]
+          flex gap-5 p-4 w-full h-full rounded-md border border-[var(--border-base)]
           bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)]
           transition-colors
           "

@@ -13,7 +13,7 @@ import { FollowButton } from '@components/ui/Buttons';
 import { BookCover } from '@components/book/BookCover';
 import { BookInfo } from '@components/book/BookInfo';
 
-import { relativeTime } from '@hooks/relativeTime';
+import { relativeTime } from '@/src/hooks/useRelativeTime';
 import { usePostLike } from '@hooks/usePostLike';
 import { useComments, type Comment } from '@hooks/useComments';
 
@@ -95,6 +95,7 @@ export function PostCard({ post }: Props) {
             width={120}
             height={180}
             href={`/books/${post.book.isbn}`}
+            addable
           />
           <BookInfo
             book={post.book}

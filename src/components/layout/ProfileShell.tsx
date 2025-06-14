@@ -5,10 +5,12 @@ import { useSession } from 'next-auth/react';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { BookOpen, MessageSquare } from 'lucide-react';
 
+import { Button } from '@components/ui/Buttons';
 import { FollowButton, EditProfileButton  } from '@components/ui/Buttons';
-import EditProfileModal from '@components/profile/EditProfileModal';
 import { PostCard, type PostWithRelations } from '@components/post/Post';
+import EditProfileModal from '@components/profile/EditProfileModal';
 
 interface ProfileShellProps {
   initialUser: {
@@ -30,23 +32,22 @@ export default function ProfileShell({ initialUser, initialPosts }: ProfileShell
 
   const [user, setUser] = useState(initialUser);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [followerCount, setFollowerCount] = useState(user.followerUsernames.length);
   
+  const isOwnProfile = loggedIn && meUsername === user.username;
   const initiallyFollowing = meUsername ? user.followerUsernames.includes(meUsername) : false;
   
   const handleFollowToggle = useCallback((nowFollowing: boolean) => {
     setFollowerCount((prev) => (nowFollowing ? prev + 1 : prev - 1 ))
   }, []);
   
-  const isOwnProfile = loggedIn && meUsername === user.username;
-
   return (
     <>
       <section className="flex gap-6">
-        <main className="flex-1 space-y-6">
+        <main className="flex-1 mx-auto max-w-[700px] px-4 py-6 space-y-6 ">
           {/* ----- Header do perfil ----- */}
-          <div className="flex flex-col md:flex-row items-center gap-4 border-b pb-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b pb-4">
+            {/* --- Avatar --- */}
             <Link href={`/profile/${user.username}`}>
               <Image
                 src={user.avatarPath || '/assets/images/users/default.jpg'}
@@ -57,44 +58,71 @@ export default function ProfileShell({ initialUser, initialPosts }: ProfileShell
               />
             </Link>
 
+            {/* --- Informações do usuário --- */}
             <div className="flex-1">
               <h1 className="text-3xl font-bold">{user.name}</h1>
-              <p className="text-sm text-[var(--text-secondary)]">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {user.bio || 'Sem bio ainda…'}
               </p>
-              <div className="flex gap-6 mt-2 text-sm">
+              <div className="mt-3 flex gap-6 text-sm font-medium">
                 <span>
                   <strong>{user.followingUsernames.length}</strong> seguindo
                 </span>
                 <span>
-                  <strong>{user.followerUsernames.length}</strong> seguidores
+                  <strong>{followerCount}</strong> seguidores
                 </span>
+              </div>
+
+              {/* --- Botão "Estante" e "Mensagenm"*/}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link href={`/profile/${user.username}/shelf`}>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <BookOpen size={16} /> Estante
+                    </Button>
+                </Link>
+                {loggedIn && !isOwnProfile && (
+                  <Link href={`/messages/${user.username}`}>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <MessageSquare size={16} /> Mensagem
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
 
-            {loggedIn && !isOwnProfile ? (
-              <FollowButton
+            {/* --- Botão de seguir/editar perfil --- */}
+            <div>
+              {loggedIn && !isOwnProfile ? (
+                <FollowButton
                 targetUsername={user.username}
-                initialFollowing={
-                  meUsername ? user.followerUsernames.includes(meUsername) : false 
-                }
+                initialFollowing={initiallyFollowing}
                 onToggle={handleFollowToggle}
-              />
-            ) : (
-              isOwnProfile && <EditProfileButton onClick={() => setIsModalOpen(true)} />
-            )}
+                size="md"
+            
+                />
+              ) : (
+                isOwnProfile && (
+                  <EditProfileButton 
+                    onClick={() => setIsModalOpen(true)} 
+                    size="md"
+                  />
+                )
+              )}
+            </div>
           </div>
 
           {/* ----- Posts do usuário ----- */}
-          {initialPosts.length > 0 ? (
-            initialPosts.map(post => (
-              <PostCard key={post.id} post={post} />
-            ))
-          ) : (
-            <p className="text-center text-[var(--text-tertiary)]">
-              Nenhum post ainda.
+          <div className="space-y-4">
+            {initialPosts.length > 0 ? (
+              initialPosts.map(post => (
+                <PostCard key={post.id} post={post} />
+              ))
+            ) : (
+              <p className="text-center text-[var(--text-tertiary)]">
+                Nenhum post ainda.
               </p>
-          )}
+            )}
+          </div>
         </main>
       </section>
 
