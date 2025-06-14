@@ -10,7 +10,7 @@ import ShelfItem from '@components/shelf/ShelfItem';
 import type { Book } from '@prisma/client';
 
 export interface ShelfItem {
-    book: Book & { coverPath: string };
+    book: Book;
     progress: number;
     addedAt: string;
 }
@@ -69,9 +69,9 @@ export default function BookshelfClient({
 
 
     return (
-        <section className="space-y-6">
+        <section className="w-full h-full space-y-6">
             {/* controles */}
-            <div className="flex flex-wrap items-center gap-4 mb-4">
+            <div className="flex items-center gap-4 mb-4">
                 <SearchBar
                     value={filterText}
                     onChange={setFilterText}

@@ -1,10 +1,6 @@
 // File: src/app/page.tsx 
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-
 import Image from 'next/image';
 import React from 'react';
 import Link  from 'next/link';
@@ -12,9 +8,6 @@ import Link  from 'next/link';
 import { Button } from '@components/ui/Buttons';
 
 export default function Home() {
-
-
-  
   return (
     <main className="flex flex-col items-center justify-center min-h-screen">
       <section className="container mx-auto px-6 py-16 flex flex-col lg:flwx-row items-center gap-12">

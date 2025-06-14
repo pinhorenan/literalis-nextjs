@@ -7,7 +7,7 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex justify-between gap-6">
       <PrimarySidebar/>
-      {children}
+      <div className="flex-1 overflow-y-auto px-4">{children}</div>
       <FeedSidebar />
     </div>
   );

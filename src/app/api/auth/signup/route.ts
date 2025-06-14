@@ -1,14 +1,13 @@
 // File: src/app/api/auth/signup/route.ts
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@server/prisma';
 
 const SignUpSchema = z.object({
-  username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres'),
-  name: z.string().min(1, 'Nome é obrigatório'),
-  email: z.string().email('Email inválido'),
+  username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres').trim(),
+  name: z.string().min(1, 'Nome é obrigatório').trim(),
+  email: z.string().email('Email inválido').trim(),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
@@ -17,6 +16,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const data = SignUpSchema.parse(body);
 
+    // Verifica duplicação de username ou email
     const exists = await prisma.user.findFirst({
       where: {
         OR: [
@@ -33,20 +33,23 @@ export async function POST(req: Request) {
       );
     }
 
+    // Criptografa senha
     const hashed = await bcrypt.hash(data.password, 12);
 
-    // cria usuario e vincula accound do nextauth
+    // Cria usuário e vincula conta de login (credentials)
     await prisma.user.create({
       data: {
         username: data.username,
         name: data.name,
         email: data.email,
         password: hashed,
+        avatarUrl: `/assets/avatars/default.png`, // opcional
+        bio: '', // opcional
+        role: 'USER',
 
-        // campos padrão como avatarPath e bio podem usar default
         accounts: {
           create: {
-            type: 'credentials',
+            accountType: 'USER',
             provider: 'credentials',
             providerAccountId: data.username,
           },
@@ -62,6 +65,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
     console.error(err);
     return NextResponse.json(
       { error: 'Erro interno ao cadastrar usuário.' },

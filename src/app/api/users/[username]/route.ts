@@ -10,7 +10,7 @@ export async function GET(
 ) {
     const { username } = await params;
 
-    const user = await prisma.user.findUnique({ where: { username: username }, select: { username: true, name: true, bio: true, avatarPath: true, email: true } });
+    const user = await prisma.user.findUnique({ where: { username: username }, select: { username: true, name: true, bio: true, avatarUrl: true, email: true } });
     if (!user){
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -28,13 +28,13 @@ export async function PATCH(
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     } 
-    if (session.user.username !== username) {
+    if (session.user.username !== username && session.user.role !== 'ADMIN') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await req.json();
-    const { name, bio, avatarPath } = body;
-    const updated = await prisma.user.update({ where: { username: username }, data: { name, bio, avatarPath }});
+    const { name, bio, avatarUrl } = body;
+    const updated = await prisma.user.update({ where: { username: username }, data: { name, bio, avatarUrl }});
 
     return NextResponse.json(updated);
 }

@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@server/prisma';
+import type { AccountType } from '@prisma/client';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -15,7 +16,7 @@ export const authOptions: NextAuthOptions = {
       name: 'Credenciais',
       credentials: {
         username: { label: 'Usuário', type: 'text' },
-        password: { label: 'Senha',   type: 'password' },
+        password: { label: 'Senha', type: 'password' },
       },
       async authorize(creds) {
         if (!creds?.username || !creds.password) return null;
@@ -27,15 +28,16 @@ export const authOptions: NextAuthOptions = {
         const ok = await bcrypt.compare(creds.password, user.password);
         if (!ok) return null;
 
-        /*  → Retorne só o mínimo; o resto buscamos no callback session  */
-        return { 
-          id: user.username, 
+        // Retorna os dados essenciais para o JWT
+        return {
+          id: user.username,
           username: user.username,
           name: user.name,
           email: user.email ?? '',
-          avatarPath: user.avatarPath ?? '',
+          avatarPath: user.avatarUrl ?? '',
           bio: user.bio ?? '',
-          image: user.avatarPath ?? '',
+          image: user.avatarUrl ?? '',
+          role: user.role,
         };
       },
     }),
@@ -43,18 +45,19 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     signIn: '/login',
-    error : '/login',
+    error: '/login',
   },
 
   /* ---------- Callbacks ---------- */
   callbacks: {
-    /* JWT armazena só a chave de lookup */
     async jwt({ token, user }) {
-      if (user) token.username = (user as any).username;
+      if (user) {
+        token.username = (user as any).username;
+        token.role = (user as any).role; // opcional, mas ajuda se quiser ler direto do token
+      }
       return token;
     },
 
-    /* Session sempre lê o usuário “fresco” do banco */
     async session({ session, token }) {
       if (!token.username) return session;
 
@@ -62,24 +65,27 @@ export const authOptions: NextAuthOptions = {
         where: { username: token.username as string },
         select: {
           username: true,
-          name:     true,
-          email:    true,
-          avatarPath: true,
-          bio:      true,
+          name: true,
+          email: true,
+          avatarUrl: true,
+          bio: true,
+          role: true,
         },
       });
 
       if (dbUser) {
         session.user = {
-          id:         dbUser.username,      // seu @id
-          username:   dbUser.username,
-          name:       dbUser.name,
-          email:      dbUser.email ?? '',
-          avatarPath: dbUser.avatarPath,
-          bio:        dbUser.bio ?? '',
-          image:      dbUser.avatarPath,    // conveniência p/ <Image>
+          id: dbUser.username,
+          username: dbUser.username,
+          name: dbUser.name,
+          email: dbUser.email ?? '',
+          avatarPath: dbUser.avatarUrl,
+          bio: dbUser.bio ?? '',
+          image: dbUser.avatarUrl,
+          role: dbUser.role as AccountType,
         };
       }
+
       return session;
     },
   },

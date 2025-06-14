@@ -6,56 +6,66 @@ import { prisma } from '@server/prisma';
 import { z } from 'zod';
 
 const UpdateSchema = z.object({
-    progress: z.number().min(0).max(100),
+  progress: z.number().min(0).max(100),
 });
 
 export async function PATCH(
-    req: NextRequest, 
-    { params }: { params: Promise<{ username: string, isbn: string}> }
+  req: NextRequest,
+  { params }: { params: Promise<{ username: string; isbn: string }> }
 ) {
-    const { username, isbn } = await params;
+  const { username, isbn } = await params;
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.username || session.user.username !== username) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.username || session.user.username !== username) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
-    const body = await req.json();
-    const parsed = UpdateSchema.safeParse(body);
-    if (!parsed.success) {
-        return NextResponse.json(
-            { error: 'Dados inválidos', issues: parsed.error.format() },
-            { status: 400 }
-        );
-    }
+  const body = await req.json();
+  const parsed = UpdateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Dados inválidos', issues: parsed.error.format() },
+      { status: 400 }
+    );
+  }
 
-    const updated = await prisma.userBook.update({
-        where: { bookIsbn_username: { bookIsbn: isbn, username: username } },
-        data: { progress: parsed.data.progress },
-        include: { book: true },
-    });
+  const updated = await prisma.userBook.update({
+    where: {
+      userUsername_bookIsbn: {
+        userUsername: username,
+        bookIsbn: isbn,
+      },
+    },
+    data: { progress: parsed.data.progress },
+    include: { book: true },
+  });
 
-    return NextResponse.json({
-        book: { ...updated.book, coverPath: updated.book.coverPath },
-        progress: updated.progress,
-        addedAt: updated.addedAt.toISOString(),
-    });
+  return NextResponse.json({
+    book: { ...updated.book, coverUrl: updated.book.coverUrl },
+    progress: updated.progress,
+    addedAt: updated.addedAt.toISOString(),
+  });
 }
 
 export async function DELETE(
-    req: NextRequest,
-    { params }: { params: Promise<{ username: string, isbn: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ username: string; isbn: string }> }
 ) {
-    const { username, isbn } = await params;
-    
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.username || session.user.username !== username) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+  const { username, isbn } = await params;
 
-    await prisma.userBook.delete({
-        where: { bookIsbn_username: { bookIsbn: isbn, username: username } }
-    });
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.username || session.user.username !== username) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
-    return NextResponse.json({ ok: true });
+  await prisma.userBook.delete({
+    where: {
+      userUsername_bookIsbn: {
+        userUsername: username,
+        bookIsbn: isbn,
+      },
+    },
+  });
+
+  return NextResponse.json({ ok: true });
 }

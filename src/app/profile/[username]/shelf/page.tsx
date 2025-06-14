@@ -16,32 +16,45 @@ export const metadata: Metadata = {
 };
 
 export default async function ShelfPage({ params }: ShelfPageProps) {
-  const { username } = params;
+  const { username } =  await params;
 
   const session = await getServerSession(authOptions);
-  const isOwner = session?.user?.username === username;
+  const me = session?.user?.username;
+  const isOwner = !!me && me === username;
 
   const shelfItems = await prisma.userBook.findMany({
-    where: { username },
-    include: { book: true },
+    where: { userUsername: username }, // campo correto!
+    include: {
+      book: {
+        select: {
+          isbn: true,
+          title: true,
+          author: true,
+          pages: true,
+          publisher: true,
+          edition: true,
+          language: true,
+          publicationDate: true,
+          coverUrl: true,
+        },
+      },
+    },
+    orderBy: { addedAt: 'desc' },
   });
 
-  const initialItems = shelfItems.map(item => ({
-    book: {
-      ...item.book,
-      coverPath: item.book.coverPath,
-    },
+  const initialItems = shelfItems.map((item) => ({
+    book: item.book,
     progress: item.progress,
     addedAt: item.addedAt.toISOString(),
   }));
 
   return (
-      <main className="flex-1 w-full h-full p-4">
-        <BookshelfClient 
-          initialItems={initialItems} 
-          username={username}
-          isOwner={isOwner} 
-          />
-      </main>
+    <main className="w-full h-full p-4">
+      <BookshelfClient
+        initialItems={initialItems}
+        username={username}
+        isOwner={isOwner}
+      />
+    </main>
   );
 }

@@ -12,21 +12,21 @@ interface EditProfileModalProps {
         username: string;
         name: string;
         bio?: string;
-        avatarPath: string;
+        avatarUrl: string;
     };
-    onSave: (updated: { name: string; bio?: string; avatarPath: string }) => void;
+    onSave: (updated: { name: string; bio?: string; avatarUrl: string }) => void;
 }
 
 export default function EditProfileModal({ isOpen, onClose, user, onSave }: EditProfileModalProps) {
     const [name, setName] = useState(user.name);
     const [bio, setBio] = useState(user.bio || '');
-    const [avatarPath, setAvatarPath] = useState(user.avatarPath);
+    const [avatarUrl, setAvatarPath] = useState(user.avatarUrl);
 
     useEffect(() => {
         if (isOpen) {
             setName(user.name);
             setBio(user.bio || '');
-            setAvatarPath(user.avatarPath);
+            setAvatarPath(user.avatarUrl);
         }
     }, [isOpen, user]);
 
@@ -36,12 +36,12 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
             method: 'PATCH',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, bio, avatarPath }),
+            body: JSON.stringify({ name, bio, avatarUrl }),
         });
         if (!res.ok) {
             return;
         }
-        onSave({ name, bio, avatarPath });
+        onSave({ name, bio, avatarUrl });
         
         onClose();
     };
@@ -80,13 +80,13 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
                         <label className="block text-sm font-medium">Avatar URL</label>
                         <input
                             type="text"
-                            value={avatarPath}
+                            value={avatarUrl}
                             onChange={(e) => setAvatarPath(e.target.value)}
                             className="mt-1 w-full rounded border px-3 py-2 bg-white dark:bg-gray-700"
                         />
                         <div className="mt-2">
                             <Image
-                                src={avatarPath}
+                                src={avatarUrl}
                                 alt="Preview"
                                 width={64}
                                 height={64}

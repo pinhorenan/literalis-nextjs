@@ -1,4 +1,4 @@
-// File src/components/auth/LoginForm.tsx
+// File src/components/auth/SignInForm.tsx
 'use client';
 
 import { useState, useRef, FormEvent } from 'react';
@@ -106,7 +106,7 @@ export function LoginForm({
             {!compact && (
                 <div className="text-center text-sm">
                     <span>Não tem conta? </span>
-                    <Link href="/auth/register" className="underline text-[var(--text-link)]">
+                    <Link href="/signup" className="underline text-[var(--text-primary)]">
                         Cadastre-se
                     </Link>
                 </div>

@@ -32,7 +32,7 @@ export default function ShelfItem({
         return (
             <div className="relative group w-fit">
                 <BookCover 
-                    src={book.coverPath} 
+                    src={book.coverUrl} 
                     alt={book.title}
                     width={240}
                     height={360} 

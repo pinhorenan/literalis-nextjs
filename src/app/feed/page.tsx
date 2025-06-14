@@ -1,44 +1,22 @@
 // File: src/app/feed/page.tsx
-'use client';
+import FeedClient                 from '@components/feed/FeedClient';
+import { prisma }                 from '@server/prisma';
+import type { RawPost, ClientPost } from '../../types/posts';
+import { mapRawToClientPost } from '@lib/mapPost';
 
-import { useState   } from 'react';
-import { useSession } from 'next-auth/react';
-import { useFeed } from '@hooks/useFeed';
+export default async function PageFeed() {
+  const rawPosts = await prisma.post.findMany({
+    take: 20,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      author: true,
+      book: true,
+      comments: { include: { author: true } },
+      likes: true,
+    },
+  }) as RawPost[];
 
-import { PrimarySidebar   } from '@components/sidebar/PrimarySidebar';
-import { FeedSidebar      } from '@components/sidebar/FeedSidebar';
-import { PostCard, PostCardSkeleton }       from '@components/post/Post';
-import { FeedSwitch, type Tab }             from '@components/ui/FeedSwitch';
+  const initialPosts: ClientPost[] = rawPosts.map(mapRawToClientPost);
 
-
-export default function PageFeed() {
-  const { status } = useSession();
-  const loggedIn = status === 'authenticated';
-  
-  const [tab, setTab] = useState<Tab>(loggedIn ? 'friends' : 'discover');
-  const { posts, error, isLoading } = useFeed(tab);
-
-  return (
-    <section className="flex gap-4">
-      <PrimarySidebar />
-
-      <main className="px-4 py-6 space-y-6 mx-auto flex-1 max-w-[700px]">
-        <FeedSwitch onChange={(t) => setTab(t)} />
-
-        {isLoading ? (
-          <PostCardSkeleton />
-        ) : error ? (
-          <p className="text-center text-red-500">{error.message}</p>
-        ) : posts.length === 0 ? (
-          <p className="text-center text-[var(--text-tertiary)]">Não há posts para mostrar.</p>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
-        )}
-      </main>
-
-      <FeedSidebar />
-    </section>
-  )
+  return <FeedClient initialPosts={initialPosts} initialTab="discover" />
 }

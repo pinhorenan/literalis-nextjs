@@ -16,7 +16,7 @@ export async function GET(
     } 
 
     const exists = await prisma.follow.findUnique({
-        where: { followerUsername_followedUsername: { followerUsername: session.user.username, followedUsername: username } },
+        where: { followerId_followedId: { followerId: session.user.username, followedId: username } },
     });
 
     return NextResponse.json({ following: Boolean(exists) });
@@ -34,7 +34,7 @@ export async function POST(
     } 
 
     const follow = await prisma.follow.create({
-        data: { followerUsername: session.user.username, followedUsername: username }
+        data: { followerId: session.user.username, followedId: username }
     });
 
     return NextResponse.json(follow);
@@ -52,7 +52,7 @@ export async function DELETE(
     } 
 
     await prisma.follow.delete({
-        where: { followerUsername_followedUsername: { followerUsername: session.user.username, followedUsername: username }},
+        where: { followerId_followedId: { followerId: session.user.username, followedId: username }},
     });
     
     return NextResponse.json({ success: true });

@@ -10,67 +10,50 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { FollowButton } from '@components/ui/Buttons';
-import { BookCover } from '@components/book/BookCover';
-import { BookInfo } from '@components/book/BookInfo';
+import { BookCover }    from '@components/book/BookCover';
+import { BookInfo }     from '@components/book/BookInfo';
 
-import { relativeTime } from '@/src/hooks/useRelativeTime';
-import { usePostLike } from '@hooks/usePostLike';
-import { useComments, type Comment } from '@hooks/useComments';
-
-import type { User, Book, Comment as PrismaComment } from '@prisma/client';
-
-export type CommentWithAuthor = PrismaComment & { id: string, author: User };
-
-export interface PostWithRelations {
-  id: string;
-  excerpt: string;
-  progressPct: number;
-  createdAt: Date;
-  updatedAt: Date;
-  commentsCount: number;
-  reactionsCount: number;
-  likedByMe: boolean;
-  isFollowingAuthor: boolean;
-  author: User;
-  book: Book;
-  comments: CommentWithAuthor[];
-}
+import { useRelativeTime }  from '@hooks/useRelativeTime';
+import { usePostLike }      from '@hooks/usePostLike';
+import { useComments }      from '@hooks/useComments';
+import type { ClientPost }  from '@/src/types/posts';
 
 interface Props {
-  post: PostWithRelations;
+  post: ClientPost;
+  isProfile?: boolean;
 }
 
-export function PostCard({ post }: Props) {
+// todo: adicionar o botão de editar/excluir post, se for o dono do post. dá pra usar o OptionsMenu
+// todo: adicionar também isso nos comentários, mas talvez seja melhor separar os comentários em um componente próprio
+// todo: o autor do post deve poder excluir comentários. o autor do comentário deve poder editar/excluir o próprio comentário
+// todo: adicionar o botão de compartilhar post (com link para o post) e o botão de compartilhar livro (com link para o livro)
+// todo: adicionar likes e replies em comentários
+export function PostCard({ post, isProfile = false }: Props) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // hook de curtir/descurtir
   const {
     liked,
     likeCount,
     loading: likeLoading,
     toggleLike,
-  } = usePostLike(post.id, post.likedByMe, post.reactionsCount);
+  } = usePostLike(post.postId, post.likedByMe, post.likeCount);
 
-  // hook de comentários
   const {
     comments,
     loading: commentLoading,
     addComment,
-  } = useComments(post.id, post.comments as Comment[]);
+  } = useComments(post.postId, post.comments);
 
-  // estados de UI
   const [draft, setDraft] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  const displayedComments = showAllComments
-    ? post.comments
-    : post.comments.slice(0, 3);
+
+  const displayedComments = showAllComments ? comments : comments.slice(0, 3); // ? considerar se 3 é um bom número padrão
 
   const handleToggleLike = useCallback(() => {
     if (status !== 'authenticated') {
-      router.push('/auth/login');
+      router.push('/signin');
     } else {
       toggleLike();
     }
@@ -85,12 +68,11 @@ export function PostCard({ post }: Props) {
   }, [draft, addComment]);
 
   return (
-    <article className="overflow-hidden max-w-[700px] border-b border-[var(--border-base)]">
-      { /* Cabeçalho do post com livro e autor */}
+    <article className="border-b border-[var(--border-base)]">
       <div className="flex flex-col md:flex-row p-4">
         <div className="flex flex-row gap-4 basis-4/7 border-r border-[var(--border-base)]">
           <BookCover
-            src={post.book.coverPath}
+            src={post.book.coverUrl}
             alt={`Capa: ${post.book.title}`}
             width={120}
             height={180}
@@ -98,7 +80,17 @@ export function PostCard({ post }: Props) {
             addable
           />
           <BookInfo
-            book={post.book}
+            book={{
+              ...post.book,
+              publisher: post.book.publisher ?? 'Desconhecida',
+              edition: post.book.edition ?? 1,
+              pages: post.book.pages ?? 0,
+              language: post.book.language ?? 'pt',
+              publicationDate: post.book.publicationDate
+                ? new Date(post.book.publicationDate)
+                : new Date(),
+              coverUrl: post.book.coverUrl,
+            }}
             className="mt-2 space-y-2"
             showPublicationDate
             strongIsbnLabel
@@ -110,7 +102,7 @@ export function PostCard({ post }: Props) {
             <div className="flex items-center gap-3">
               <Link href={`/profile/${post.author.username}`}>
                 <Image
-                  src={post.author.avatarPath || '/assets/images/users/default.jpg'}
+                  src={post.author.avatarUrl}
                   alt={post.author.name}
                   width={40}
                   height={40}
@@ -125,12 +117,12 @@ export function PostCard({ post }: Props) {
                   {post.author.name}
                 </Link>
                 <time className="block text-xs text-[var(--text-secondary)]">
-                  {relativeTime(post.createdAt)}
+                  {useRelativeTime(post.createdAt)}
                 </time>
               </div>
             </div>
 
-            {session?.user.username !== post.author.username && (
+            {session?.user.username !== post.author.username && !isProfile &&(
               <FollowButton
                 targetUsername={post.author.username}
                 initialFollowing={post.isFollowingAuthor}
@@ -146,26 +138,25 @@ export function PostCard({ post }: Props) {
               <div className="flex-1 w-full h-4 bg-[var(--color-secondary)] dark:bg-[var(--neutral-600)] border border-[var(--border-base)] rounded overflow-hidden">
                 <div
                   className="h-full bg-[var(--color-primary)] dark:bg-[var(--neutral-400)]"
-                  style={{ width: `${post.progressPct}%` }}
+                  style={{ width: `${post.progress}%` }}
                 />
               </div>
-              <strong className="text-sm">{post.progressPct}% lido</strong>
+              <strong className="text-sm">{post.progress}% lido</strong>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Ações do post */}
       <div className="flex items-center border-y border-[var(--border-base)] gap-4 px-4 py-2">
-        <button 
+        <button
           onClick={handleToggleLike}
-          disabled={likeLoading} 
+          disabled={likeLoading}
           className="flex items-center gap-1"
         >
           <Heart
             className={clsx(
               'cursor-pointer transition-colors',
-              liked && '[var(--text-primary)] fill-current',
+              liked && '[var(--text-primary)] fill-current'
             )}
           />
           <span>{likeCount}</span>
@@ -178,7 +169,7 @@ export function PostCard({ post }: Props) {
           title="Enviar comentário"
         >
           <MessageCircle />
-          <span>{post.commentsCount}</span>
+          <span>{comments.length}</span>
         </button>
 
         <input
@@ -192,25 +183,25 @@ export function PostCard({ post }: Props) {
         />
       </div>
 
-      {/* Lista de comentários */}
+      { /* Renderiza os comentários */}
       <div className="px-4 py-2 space-y-3">
         {displayedComments.length > 0 ? (
           displayedComments.map((c) => (
             <div key={c.id} className="flex items-center gap-2">
               <Image
-                src={c.author.avatarPath || '/assets/images/users/default.jpg'}
-                alt={c.author.name}
+                src={c.author.avatarUrl || '/assets/images/users/default.jpg'}
+                alt={c.author.name ?? 'Usuário'}
                 width={26}
                 height={26}
                 className="rounded-full"
               />
               <div className="flex-1 text-sm">
                 <Link href={`/profile/${c.author.username}`}>
-                <strong>{c.author.name}:</strong> {c.text}
+                  <strong>{c.author.name ?? c.author.username}:</strong> {c.content}
                 </Link>
               </div>
               <time className="text-xs text-[var(--text-tertiary)]">
-                {relativeTime(c.createdAt)}
+                {useRelativeTime(c.createdAt)}
               </time>
             </div>
           ))
@@ -225,7 +216,7 @@ export function PostCard({ post }: Props) {
             className="text-sm text-[var(--text-primary)] hover:underline block mx-auto"
             onClick={() => setShowAllComments(true)}
           >
-            <strong>Ver mais comentários ({post.comments.length - 3})</strong>
+            <strong>Ver mais comentários ({comments.length - 3})</strong>
           </button>
         )}
         {showAllComments && (
@@ -241,7 +232,6 @@ export function PostCard({ post }: Props) {
   );
 }
 
-/* ───── Skeleton ─────────────────────────────────────────────────────── */
 export function PostCardSkeleton() {
   return (
     <article className="max-w-[700px] border-b border-[var(--border-base)] animate-pulse">

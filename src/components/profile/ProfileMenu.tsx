@@ -8,12 +8,12 @@ import { useClickOutside } from '@hooks/useClickOutside';
 type MenuItem = { label: string; onClick: () => void };
 
 export default function ProfileMenu({
-  avatarSrc,
+  avatarUrl,
   userName,
   onLogout,
   items = [],
 }: {
-  avatarSrc: string;
+  avatarUrl: string;
   userName: string;
   onLogout: () => void;
   items?: MenuItem[];
@@ -37,7 +37,7 @@ export default function ProfileMenu({
         onClick={() => setOpen(o => !o)}
         className="p-0 rounded-full border-2 border-[var(--surface-card)] overflow-hidden"
       >
-        <img src={avatarSrc} alt={userName} className="w-10 h-10 object-cover" />
+        <img src={avatarUrl} alt={userName} className="w-10 h-10 object-cover" />
       </button>
 
       {open && (

@@ -1,66 +1,84 @@
 // File: src/app/profile/[username]/page.tsx
-import ProfileShell from '@components/layout/ProfileShell'
-import { notFound } from 'next/navigation'
-import { prisma } from '@server/prisma'
+import { notFound } from 'next/navigation';
+import { prisma } from '@server/prisma';
+import ProfileShell from '@components/profile/ProfileShell';
+import type { ClientPost } from '@/src/types/posts';
 
-export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+interface ProfilePageProps {
+  params: { username: string };
+}
+
+export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
 
   const user = await prisma.user.findUnique({
-    where: { username },
-    include: {
-      followers: { select: { followerUsername: true } },
-      following: { select: { followedUsername: true } },
+    where:    { username },
+    include:  {
+      followers: { select: { follower: true } },
+      following: { select: { followed: true } },
     },
-  })
+  });
 
-  if (!user) return notFound()
+  if (!user) return notFound();
 
-  // Busca posts do usuário
   const rawPosts = await prisma.post.findMany({
-    where: { authorUsername: username },
-    include: {
-      author: true,
-      book: true,
+    where:    { authorUsername: username },
+    include:  {
+      author:   true,
+      book:     true,
+      likes:    true,
       comments: { include: { author: true } },
-      likes: true,
     },
-    orderBy: { createdAt: 'desc' },
-  })
+    orderBy:    { createdAt: 'desc' },
+  });
 
-  // Mapeia para PostWithRelations
-  const posts = rawPosts.map(p => ({
-    id: p.postId,
-    authorId: p.authorUsername,
-    bookIsbn: p.bookIsbn,
-    excerpt: p.excerpt,
-    progressPct: p.progressPct,
-    createdAt: p.createdAt,
-    updatedAt: p.updatedAt,
-    commentsCount: p.commentCount,
-    reactionsCount: p.likeCount,
-    author: p.author,
-    book: p.book,
-    comments: p.comments.map(c => ({
-      ...c,
-      id: c.commentId,
+  const posts: ClientPost[] = rawPosts.map((p) => ({
+    postId:             p.id,
+    excerpt:            p.excerpt,
+    progress:           p.progress,
+    createdAt:          p.createdAt.toISOString(),
+    updatedAt:          p.updatedAt.toISOString(),
+    likeCount:          p.likes.length,
+    commentCount:       p.comments.length,
+    likedByMe:          false,
+    isFollowingAuthor:  false,
+    
+    author: {
+      username:         p.author.username,
+      name:             p.author.name,
+      avatarUrl:        p.author.avatarUrl,
+    },
+
+    book: {
+      isbn:             p.book.isbn,
+      title:            p.book.title,
+      author:           p.book.author,
+      coverUrl:         p.book.coverUrl,
+    },
+
+    comments: p.comments.map((c) => ({
+      id:               c.id,
+      content:          c.content,
+      createdAt:        c.createdAt.toISOString(),
+      author: {
+        username:       c.author.username,
+        name:           c.author.name,
+        avatarUrl:      c.author.avatarUrl,
+      },
     })),
-    likes: p.likes,
-    likedByMe: false,
-    isFollowingAuthor: false,
-  }))
+  }));
 
   return (
     <ProfileShell
       initialUser={{
-        username: user.username,
-        name: user.name,
-        avatarPath: user.avatarPath,
-        bio: user.bio ?? undefined,
-        followerUsernames: user.followers.map(f => f.followerUsername),
-        followingUsernames: user.following.map(f => f.followedUsername),
+        username:           user.username,
+        name:               user.name,
+        avatarUrl:          user.avatarUrl,
+        bio:                user.bio ?? undefined,
+        followerUsernames:  user.followers.map((f) => f.follower.username),
+        followingUsernames: user.following.map((f) => f.followed.username),
       }}
       initialPosts={posts}
     />
-  )
+  );
 }

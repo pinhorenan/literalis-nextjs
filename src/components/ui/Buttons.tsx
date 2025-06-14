@@ -186,10 +186,22 @@ export function EditProfileButton(props: ButtonProps) {
 }
 
 export function LogoButton() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  const logoSrc =
+    resolvedTheme === 'light'
+      ? "/assets/icons/light/main_logo.svg"
+      : "/assets/icons/dark/main_logo.svg";
+
   return (
     <Button
       variant="logo"
-      logoSrc="/assets/icons/light/main_logo.svg"
+      logoSrc={logoSrc}
       logoAlt="Logo do site"
       logoSize={140}
       className="mb-2 self-start"

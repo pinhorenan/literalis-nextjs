@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@components/ui/Buttons';
-import { SearchBar } from "@/src/components/search/SearchBar";
+import { SearchBar } from '@components/search/SearchBar';
 
 const resources = ['books', 'posts', 'users'] as const;
 type Resource = typeof resources[number];
-type AnyObject = { id: string; [key: string]: any };
+type AnyObject = { id?: string; [key: string]: any };
 
 export default function AdminPage() {
   const [resource, setResource] = useState<Resource>('books');
@@ -16,12 +16,11 @@ export default function AdminPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
   const [newItem, setNewItem] = useState('{}');
   const [editItem, setEditItem] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  async function fetchData() {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -34,23 +33,22 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
     setSearchTerm('');
     setExpandedId(null);
+    setEditingId(null);
+    setEditItem('');
   }, [resource]);
 
   const filtered = useMemo(() => {
-    if (!searchTerm.trim()) return data;
+    const term = searchTerm.toLowerCase();
     return data.filter(item => {
-      const term = searchTerm.toLowerCase();
       if (resource === 'users') {
-        return (
-          (item.username?.toLowerCase().includes(term)) ||
-          (item.name?.toLowerCase().includes(term))
-        );
+        return item.username?.toLowerCase().includes(term) ||
+               item.name?.toLowerCase().includes(term);
       }
       if (resource === 'books') {
         return item.title?.toLowerCase().includes(term);
@@ -60,178 +58,176 @@ export default function AdminPage() {
                item.content?.toLowerCase().includes(term);
       }
       return JSON.stringify(item).toLowerCase().includes(term);
-  });
-}, [ searchTerm, data, resource]);
-
-function startEdit(item: AnyObject) {
-  setEditingId(item.id);
-  setEditItem(JSON.stringify(item, null, 2));
-}
-
-async function handleCreate() {
-  try {
-    const payload = JSON.parse(newItem);
-    const res = await fetch(`/api/${resource}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    setNewItem('{}');
-    fetchData();
-  } catch (err: any) {
-    alert('Falha: ' + err.message);
-  }
-}
+  }, [searchTerm, data, resource]);
 
-async function handleUpdate() {
-  if (!editingId) return;
-  try {
-    const payload = JSON.parse(editItem);
-    const res = await fetch(`/api/${resource}/${editingId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    setEditingId(null);
-    setEditItem('');
-    fetchData();
-  } catch (err: any) {
-    alert('Falha: ' + err.message);
-  }
-}
+  const getItemKey = (item: AnyObject, index: number) =>
+    item.id || item.username || item.title || `item-${index}`;
 
-async function handleDelete(id: string) {
-  if (!confirm(`Excluir ${resource.replace(/s$/, '')} ${id}?`)) return;
-  try {
-    const res = await fetch(`/api/${resource}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    fetchData();
-  } catch (err: any) {
-    alert('Falha: ' + err.message);
-  }
-}
+  const getLabel = (item: AnyObject) =>
+    item.username || item.title || item.name || item.id || 'Sem nome';
 
-function getLabel(item: AnyObject) {
-  if (resource === 'users') return item.username || item.id;
-  if (resource === 'books') return item.title || item.id;
-  if (resource === 'posts') return item.title || item.id;
-  return item.id;
-}
+  const startEdit = (item: AnyObject) => {
+    const key = getItemKey(item, 0); // segurança
+    setEditingId(String(key));
+    setEditItem(JSON.stringify(item, null, 2));
+  };
 
-return (
-  <div className="p-6 space-y-6 bg-[var(--surface-card)~rounded-[var(--radius-md)] shadow-[var(--shadow-md)]">
-    <h1 className="text-2x1 font-semibold text-[var(--text-primary)]">
-      Administração de {resource.charAt(0).toUpperCase() + resource.slice(1)}
-    </h1>
+  const handleCreate = async () => {
+    try {
+      const payload = JSON.parse(newItem);
+      const res = await fetch(`/api/${resource}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      setNewItem('{}');
+      fetchData();
+    } catch (err: any) {
+      alert('Falha: ' + err.message);
+    }
+  };
 
-  <div className="flex gap-2">
-    {resources.map(r => (
-      <Button
-        key={r}
-        size="xs"
-        variant={r === resource ? 'default' : 'outline'}
-        onClick={() => setResource(r)}
-      >
-        {r}
-      </Button>
-    ))}
-  </div>
+  const handleUpdate = async () => {
+    if (!editingId) return;
+    try {
+      const payload = JSON.parse(editItem);
+      const res = await fetch(`/api/${resource}/${editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      setEditingId(null);
+      setEditItem('');
+      fetchData();
+    } catch (err: any) {
+      alert('Falha: ' + err.message);
+    }
+  };
 
-  <SearchBar
-    placeholder={`Pesquisar ${resource}...`}
-    value={searchTerm}
-    onChange={e => setSearchTerm(e.target.value)}
-    className="max-w-md"
-  />
+  const handleDelete = async (id: string) => {
+    if (!confirm(`Excluir ${resource.slice(0, -1)} ${id}?`)) return;
+    try {
+      const res = await fetch(`/api/${resource}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      fetchData();
+    } catch (err: any) {
+      alert('Falha: ' + err.message);
+    }
+  };
 
-  {loading ? (
-    <p className="text-sm text-[var(--text-secondary)]">Carregando...</p>
-  ) : error ? (
-    <p className="text-sm text-[var(--color-danger)]">{error}</p>
-  ) : (
-    <div className="space-y-3 max-h-[60vh] overflow-auto">
-      {filtered.map(item => (
-        <div
-          key={item.id}
-          className="p-3 flex items-center justify-between bg-[var(--surface-alt)] rounded-lg hover:shadow-[var(--shadow-sm)]"
-        >
-          <div>
-            <span className="font-medium text-[var(--text-primary)]">
-              {getLabel(item)}
-            </span>
-            <span className="ml-2 text-xs text-[var(--text-tertiary)]">
-              ({item.id})
-            </span>
-          </div>
-          <div className="flex gap-1">
-            <Button size="xs" onClick={() => startEdit(item)}>
-              Editar
-            </Button>
-            <Button
-              size="xs"
-              variant="destructive"
-              onClick={() => handleDelete(item.id)}
-            >
-              Excluir
-            </Button>
+  return (
+    <div className="p-6 space-y-6 bg-[var(--surface-card)] rounded-[var(--radius-md)] shadow-[var(--shadow-md)]">
+      <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
+        Administração de {resource.charAt(0).toUpperCase() + resource.slice(1)}
+      </h1>
 
-            <Button
-              size="xs"
-              variant={expandedId === item.id ? 'default' : 'outline'}
-              onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-            >
-              {expandedId === item.id ? 'Esconder' : 'Expandir'}
-            </Button>
-          </div>
-
-          {expandedId === item.id && (
-            <pre className="mt-2 w-full p-2 bg-[var(--surface-bg)] border border-[var(--border-base)] rounded font-mono text-xs max-h-40 overflow-auto">
-              {JSON.stringify(item, null, 2)}
-            </pre>
-          )}
+      <div className="flex gap-2">
+        {resources.map(r => (
+          <Button
+            key={r}
+            size="xs"
+            variant={r === resource ? 'default' : 'outline'}
+            onClick={() => setResource(r)}
+          >
+            {r}
+          </Button>
+        ))}
       </div>
-      ))}
-      {filtered.length === 0 && (
-        <p className="text-sm text-[var(--text-secondary)]">
-          Nenhum item encontrado.
-        </p>
+
+      <SearchBar
+        placeholder={`Pesquisar ${resource}...`}
+        value={searchTerm}
+        onChange={setSearchTerm}
+        className="max-w-md"
+      />
+
+      {loading ? (
+        <p className="text-sm text-[var(--text-secondary)]">Carregando...</p>
+      ) : error ? (
+        <p className="text-sm text-[var(--color-danger)]">{error}</p>
+      ) : (
+        <div className="space-y-3 max-h-[60vh] overflow-auto">
+          {filtered.map((item, index) => {
+            const key = getItemKey(item, index);
+            return (
+              <div
+                key={key}
+                className="p-3 flex flex-col gap-2 bg-[var(--surface-alt)] rounded-lg hover:shadow-[var(--shadow-sm)]"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-medium text-[var(--text-primary)]">
+                      {getLabel(item)}
+                    </span>
+                    <span className="ml-2 text-xs text-[var(--text-tertiary)]">
+                      ({key})
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="xs" onClick={() => startEdit(item)}>Editar</Button>
+                    <Button size="xs" variant="destructive" onClick={() => handleDelete(String(item.id))}>
+                      Excluir
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant={expandedId === key ? 'default' : 'outline'}
+                      onClick={() => setExpandedId(expandedId === key ? null : String(key))}
+                    >
+                      {expandedId === key ? 'Esconder' : 'Expandir'}
+                    </Button>
+                  </div>
+                </div>
+
+                {expandedId === key && (
+                  <pre className="p-2 bg-[var(--surface-bg)] border border-[var(--border-base)] rounded font-mono text-xs max-h-40 overflow-auto">
+                    {JSON.stringify(item, null, 2)}
+                  </pre>
+                )}
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <p className="text-sm text-[var(--text-secondary)]">Nenhum item encontrado.</p>
+          )}
+        </div>
+      )}
+
+      {/* CREATE */}
+      <div className="space-y-2 border-t pt-4">
+        <h2 className="font-medium text-[var(--text-primary)]">Criar novo</h2>
+        <textarea
+          className="w-full h-24 p-2 bg-[var(--surface-input)] border border-[var(--border-base)] rounded font-mono text-sm"
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+        />
+        <Button size="xs" onClick={handleCreate}>
+          Criar {resource.slice(0, -1)}
+        </Button>
+      </div>
+
+      {/* EDIT */}
+      {editingId && (
+        <div className="space-y-2 border-t pt-4">
+          <h2 className="font-medium text-[var(--text-primary)]">Editando: {editingId}</h2>
+          <textarea
+            className="w-full h-32 p-2 bg-[var(--surface-input)] border border-[var(--border-base)] rounded font-mono text-sm"
+            value={editItem}
+            onChange={(e) => setEditItem(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <Button size="xs" onClick={handleUpdate}>Salvar</Button>
+            <Button size="xs" variant="outline" onClick={() => {
+              setEditingId(null);
+              setEditItem('');
+            }}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
       )}
     </div>
-  )}
-
-  {/* CREATE */}
-  <div className="space-y-2">
-    <textarea
-      className="w-full h-24 p-2 bg-[var(--surface-input)] border border-[var(--border-base)] rounded font-mono text-sm"
-      value={newItem}
-      onChange={e => setNewItem(e.target.value)}
-    />
-    <Button size="xs" onClick={handleCreate}>
-      Criar {resource.replace(/s$/, '')}  
-    </Button>
-  </div>
-
-  {/* EDIT */}
-  {editingId && (
-    <div className="space-y-2">
-      <textarea
-        className="w-full h-24 p-2 bg-[var(--surface-input)] border border-[var(--border-base)] rounded font-mono text-sm"
-        value={editItem}
-        onChange={e => setEditItem(e.target.value)}
-      />
-      <div className="flex gap-2">
-        <Button size="xs" onClick={handleUpdate}>
-          Salvar
-        </Button>
-        <Button size="xs" variant="outline" onClick={() => setEditingId(null)}>
-          Cancelar
-        </Button>
-      </div>
-  </div>
-)}
-</div>
   );
 }
-

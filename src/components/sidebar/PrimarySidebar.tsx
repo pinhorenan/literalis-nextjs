@@ -1,58 +1,60 @@
 // File: src/components/sidebar/PrimarySidebar.tsx
 'use client';
 
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { User, Users, Globe, BookOpen, Search, MessageSquare, Bell } from 'lucide-react';
-import { SidebarShell } from '@components/layout/SidebarShell';
+
+import { SidebarShell } from '@components/sidebar/SidebarShell';
 import { LogoutMenu } from '@components/ui/LogoutMenu';
-import { Button } from '@components/ui/Buttons';
+import { Button, LogoButton } from '@components/ui/Buttons';
 
+interface NavItem {
+  label: string;
+  icon: React.ElementType;
+  href: string;
+}
 
-export function PrimarySidebar() {
-    const { data: session } = useSession();
-    const username = session?.user?.username;
-    
-    const nav = [
-        { label: 'Perfil',          icon: User,            href: `/profile/${username}`         },
-        { label: 'Amigos',          icon: Users,           href: '/friends'                     },
-        { label: 'Explorar',        icon: Globe,           href: '/feed'                        },
-        { label: 'Estante',         icon: BookOpen,        href: `/profile/${username}/shelf/`  },
-        { label: 'Pesquisar',       icon: Search,          href: '/search'                      },
-        { label: 'Notificações',    icon: Bell,            href: '/notifications'               },
-        { label: 'Mensagens',       icon: MessageSquare,   href: '/message'                     },
-    ];
+export default function PrimarySidebar() {
+  const { data: session } = useSession();
+  const username = session?.user?.username;
 
-    return (
-        <SidebarShell position="left">
-            <div className="flex flex-col h-full">
-                <Link href="/">
-                    <Button
-                        variant="logo"
-                        logoSrc="/assets/icons/dark/main_logo.svg"
-                        logoSize={140}
-                        logoAlt="Logo do site"
-                        aria-label="Logo do site"
-                        className="mb-2"
-                    />
-                </Link>
+  const nav: NavItem[] = [
+    ...(username
+      // todo: adicionar aqui um item de home que redireciona para o feed e fica no topo.
+      ? [{ label: 'Perfil', icon: User, href: `/profile/${username}` }]
+      : []),
+    { label: 'Amigos', icon: Users, href: '/friends' }, // todo: implementar página amigos
+    { label: 'Explorar', icon: Globe, href: '/feed' },
+    ...(username
+      ? [{ label: 'Estante', icon: BookOpen, href: `/profile/${username}/shelf/` }]
+      : []),
+    { label: 'Pesquisar', icon: Search, href: '/search' }, // todo: implementar pesquisa
+    { label: 'Notificações', icon: Bell, href: '/notifications' }, // todo: implementar notificações
+    { label: 'Mensagens', icon: MessageSquare, href: '/message' }, // todo: implementar mensagens
+    // todo: adicionar item de novo livro ou algo similar (novo post?)
+  ];
 
-                <nav className="flex flex-col gap-1">
-                    {nav.map(({ label, icon: Icon, href }) => (
-                        <Link key={label} href={href}>
-                            <Button
-                                variant="default"
-                                className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-3 rounded-lg border-none"
-                            >
-                                <Icon size={30} className="text-[var(--text-secondary)]" />
-                                <strong className="text-lg text-[var(--text-secondary)]">{label}</strong>
-                            </Button>
-                        </Link>
-                    ))}
-                </nav>
+  return (
+    <SidebarShell position="left">
+      <div className="flex flex-col h-full">
+        <LogoButton />
 
-                <LogoutMenu />
-            </div>
-        </SidebarShell>
-    );
+        <nav className="flex flex-col items-start gap-1 mt-2">
+          {nav.map(({ label, icon: Icon, href }) => (
+            <Button
+              key={label}
+              href={href}
+              iconSize={30}
+              variant="default"
+              className="bg-transparent hover:bg-[var(--surface-card-hover)] gap-3 rounded-lg border-none"
+            >
+              <Icon icon={Icon}/><strong className="text-lg text-[var(--text-secondary)]">{label}</strong>
+            </Button>
+          ))}
+        </nav>
+
+        <LogoutMenu />
+      </div>
+    </SidebarShell>
+  );
 }

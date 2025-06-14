@@ -1,45 +1,61 @@
-// api/post/[postId]/comments/route.ts
+// File: src/app/api/posts/[postId]/comments/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@server/auth';
 import { prisma } from '@server/prisma';
 
 export async function GET(
-    req: NextRequest, 
-    { params }: { params: Promise<{ postId: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
-    const { postId } = await params;
-    
-    const comments = await prisma.comment.findMany({
-        where: { postId: postId },
-        include: { author: { select: { username: true, name: true, avatarPath: true } } },
-        orderBy: { createdAt: 'asc' }
-    });
+  const { postId } = await params;
 
-    return NextResponse.json(comments);
+  const comments = await prisma.comment.findMany({
+    where: { postId },
+    include: {
+      author: {
+        select: {
+          username: true,
+          name: true,
+          avatarUrl: true, // ✅ campo correto
+        },
+      },
+    },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  return NextResponse.json(comments);
 }
 
 export async function POST(
-    req: NextRequest, 
-    { params }: { params: Promise<{ postId: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
-    const { postId } = await params;
-    
-    const session = await getServerSession(authOptions);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    } 
+  const { postId } = await params;
 
-    const { text } = await req.json();
-    const comment = await prisma.comment.create({
-        data: { authorUsername: session.user.username, postId: postId, text },
-        include: { author: { select: { username: true, name: true, avatarPath: true } } }
-    });
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-    await prisma.post.update({
-        where: { postId },
-        data: { commentCount: { increment: 1 } }
-    })
+  const { content } = await req.json(); // ✅ nome correto
 
-    return NextResponse.json(comment);
+  const comment = await prisma.comment.create({
+    data: {
+      authorUsername: session.user.username, // ✅ campo correto
+      postId,
+      content,
+    },
+    include: {
+      author: {
+        select: {
+          username: true,
+          name: true,
+          avatarUrl: true,
+        },
+      },
+    },
+  });
+
+  return NextResponse.json(comment);
 }

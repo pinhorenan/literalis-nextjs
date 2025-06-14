@@ -13,11 +13,10 @@ export function UserSummary() {
         return <p className="text-sm text-[var-(--text-tertiary)]">Carregando...</p> // todo: fazer um skeleton?
     }
 
-    const user = session?.user;
-    const name = user?.name ?? user?.email ?? 'Visitante';
-    const imageSrc = user?.image
-        ? `${user.image}?v=${Date.now()}` // Cache busting
-        : '/assets/images/users/system.jpg';
+    const user      = session?.user;
+    
+    const name      = user?.name ?? 'Visitante';
+    const imageSrc  = user?.image ?? '/assets/images/users/default.jpg';
 
     return (
         <div className="flex items-center gap-3">
@@ -30,7 +29,7 @@ export function UserSummary() {
             />
             <div>
                 {user?.username && (
-                    <Link href={`/profile/${user.username}/`} className=" text-[var(--text-link)]">
+                    <Link href={`/profile/${user.username}/`} className=" text-[var(--text-primary)]">
                         {name}
                     </Link>
                 )}

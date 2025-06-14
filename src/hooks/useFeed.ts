@@ -1,28 +1,35 @@
-// File: src/hook/useFeed.ts
+// File: src/hooks/useFeed.ts
 'use client';
 
-import useSWR           from 'swr';
-import { useSession }   from 'next-auth/react';
+import useSWR from 'swr';
+import { useSession } from 'next-auth/react';
+import type { ClientPost } from '@/src/types/posts';
 
-import type { PostWithRelations }   from '@components/post/Post';
-import type { Tab }                 from '@components/ui/FeedSwitch';
+/**
+ * Hook de carregamento do feed de posts.
+ * Substitui PostWithRelations por tipo simplificado para o frontend.
+ * 
+ * @param tab - aba selecionada, 'friends' ou 'discover'
+ * @returns Lista de posts, estado de carregamento e erro
+ */
+export function useFeed(tab: 'friends' | 'discover') {
+  const { data: session } = useSession();
+  const mode = tab === 'friends' ? 'friends' : 'all';
 
-const fetcher = (url: string) =>
-    fetch(url, { credentials: 'include' }).then((r) => {
-        if (!r.ok) throw new Error(r.statusText);
-        return r.json();
-    });
+  const fetcher = async (url: string) => {
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  };
 
-export function useFeed(tab: Tab) {
-    const { data: session } = useSession();
-    const mode = tab === 'friends' ? 'friends' : 'all';
+  const { data, error, isLoading } = useSWR<{ posts: ClientPost[] }>(
+    `/api/feed?mode=${mode}&limit=20`,
+    fetcher
+  );
 
-    const { data, error, isLoading } = useSWR(
-        `/api/feed?mode=${mode}&limit=20`,
-        fetcher
-    );
-
-    const posts: PostWithRelations[] = data?.posts ?? [];
-
-    return { posts, isLoading, error };
+  return {
+    posts: data?.posts ?? [],
+    isLoading,
+    error,
+  };
 }
