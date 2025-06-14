@@ -1,4 +1,4 @@
-// hooks/relativeTime.ts
+// File: src/hooks/useRelativeTime.ts
 
 const MINUTE = 60_000;
 const HOUR   = 60 * MINUTE;
