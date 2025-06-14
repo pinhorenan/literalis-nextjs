@@ -3,7 +3,7 @@ import { ReactNode }  from 'react';
 import PrimarySidebar from '@components/sidebar/PrimarySidebar';
 import FeedSidebar    from '@components/feed/FeedSidebar';
 
-export default function ProfileLayout({ children }: { children: ReactNode }) {
+export default function FeedLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex justify-between gap-6">
       <PrimarySidebar/>

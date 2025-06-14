@@ -1,15 +1,14 @@
-// app/profile/layout.tsx
+// File: src/app/profile/[username]/shelf/layout.tsx
+import { ReactNode }  from 'react';
+import PrimarySidebar from '@components/sidebar/PrimarySidebar';
+import FeedSidebar    from '@components/feed/FeedSidebar';
 
-import { ReactNode } from 'react';
-import { PrimarySidebar } from '@components/sidebar/PrimarySidebar';
-import { FeedSidebar } from '@components/sidebar/FeedSidebar';
-
-export default function ProfileLayout({ children }: { children: ReactNode }) {
+export default function ShelfLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <div className="flex justify-between gap-6">
       <PrimarySidebar/>
       {children}
       <FeedSidebar />
-    </>
+    </div>
   );
 }
