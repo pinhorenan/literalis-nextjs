@@ -29,7 +29,7 @@ export default function MobileBottomNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface-bg)] border-t border-[var(--border-base)] flex justify-around py-2">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface-bg)] border-t border-[var(--border-base)] flex justify-around py-4">
         {navItems.map(({ icon: Icon, href, onClick, label }) => {
           if (onClick) {
             return (
@@ -39,7 +39,6 @@ export default function MobileBottomNav() {
                 className="flex flex-col items-center text-sm text-[var(--text-secondary)]"
               >
                 <Icon size={24} />
-                <span className="text-xs mt-1">{label}</span>
               </button>
             );
           }
@@ -51,7 +50,6 @@ export default function MobileBottomNav() {
               className="flex flex-col items-center text-sm text-[var(--text-secondary)]"
             >
               <Icon size={24} />
-              <span className="text-xs mt-1">{label}</span>
             </Link>
           );
         })}

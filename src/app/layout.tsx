@@ -1,8 +1,9 @@
 // File: src/app/layout.tsx
 
-import type { Metadata }    from  'next';
+import { type Metadata    } from  'next';
+import { ReactNode        } from  'react';
 import { getServerSession } from  'next-auth';
-import { authOptions }      from  '@server/auth';
+import { authOptions      } from  '@server/auth';
 import ThemeProvider        from  '@app/theme-provider';
 import Providers            from  '@app/providers';
 
@@ -12,32 +13,22 @@ export const metadata: Metadata = {
   title: 'Literalis',
   description: 'Rede social literária',
   icons: {
-    icon: '/icons/favicon.svg',
-    shortcut: '/favicon.svg',
+    icon: '/assets/icons/favicon.svg',
+    shortcut: '/assets/favicon.svg',
   },
 };
 
-export default async function RootLayout({ 
-  children, 
-}: { 
-  children: React.ReactNode }
-) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body 
-        className="
-          min-h-screen min-w-screen 
-          font-sans antialiased 
-          selection:bg-[var(--surface-base)] selection:text-[var(--text-primary)]
-        "
-      >
+      <body className="min-h-screen min-w-screen font-sans antialiased">
         <Providers session={session}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <div className="bg-[var(--surface-bg) min-h-screen overflow-x-hidden">
-              {children}
-            </div>
+          <ThemeProvider attribute="class" defaultTheme="sytem">
+              <main className="flex-1">
+                {children}
+              </main>
           </ThemeProvider>
         </Providers>
       </body>
