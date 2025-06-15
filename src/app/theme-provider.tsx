@@ -1,5 +1,6 @@
-// app/theme-provider.tsx
+// File: src/app/theme-provider.tsx
 'use client';
+
 import { ReactNode } from 'react';
 import { ThemeProvider as NextThemes } from 'next-themes';
 

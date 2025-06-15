@@ -7,9 +7,9 @@ import FeedSidebar      from '@components/layout/FeedSidebar';
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:ga:6 w-full max-w-screen-xl mx-auto px-4 md:px-8">
-      <aside className="hidden md:block w-[240px] shrink-0">
-        <PrimarySidebar/>
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 w-full max-w-screen-xl mx-auto px-4 md:px-8">
+      <aside className="hidden lg:block w-[240px] shrink-0">
+        <PrimarySidebar />
       </aside>
 
       <main className="flex-1 min-w-0">

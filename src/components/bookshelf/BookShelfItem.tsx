@@ -1,12 +1,10 @@
-// File: src/components/shelf/ShelfItem.tsx
+// File: src/components/bookshelf/BookShelfItem.tsx
 'use client';
 
 import { useRef }       from 'react';
-
 import OptionsMenu      from '@components/ui/OptionsMenu';
 import BookCover        from '@components/book/BookCover';
 import BookInfo         from '@components/book/BookInfo';
-
 import type { Book }    from '@prisma/client';
 
 
@@ -37,7 +35,6 @@ export default function ShelfItem({
     const menuRef = useRef<HTMLDivElement>(null);
 
     if (viewMode === 'grid') {
-        // modo grid
         return (
             <div className={`relative group w-full max-w-[180px] mx-auto ${className}`}>
                 <BookCover 
@@ -71,7 +68,6 @@ export default function ShelfItem({
         );
     }
 
-    // modo lista
     return (
         <div className={`relative flex items-center px-2 py-1 rounded-md bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] transition ${className}`}>
             

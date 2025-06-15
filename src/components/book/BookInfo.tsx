@@ -40,6 +40,10 @@ export default function BookInfo({
       )}
 
       <p className="text-sm">
+        {book.pages} páginas • {book.language}
+      </p>
+
+      <p className="text-sm">
         {strongIsbnLabel ? (
           <>
             <strong>ISBN:</strong> {book.isbn}

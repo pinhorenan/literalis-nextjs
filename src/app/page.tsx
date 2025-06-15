@@ -3,10 +3,8 @@
 import Image from 'next/image';
 import React from 'react';
 import Link  from 'next/link';
-
 import { Button, ThemeToggle } from '@components/ui/Buttons';
 
-// ! reformular totalmente essa bosta
 export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen">

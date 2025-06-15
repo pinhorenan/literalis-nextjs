@@ -31,10 +31,6 @@ export default function LogoutMenu() {
                     >
                       <LogOut size={30}/><strong className="text-lg text-[var(--text-secondary)]">Sair</strong>
                     </Button>
-
-
-
-
                 </div>
             )}
         </div>

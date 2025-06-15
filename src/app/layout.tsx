@@ -3,11 +3,10 @@
 import type { Metadata }    from  'next';
 import { getServerSession } from  'next-auth';
 import { authOptions }      from  '@server/auth';
+import ThemeProvider        from  '@app/theme-provider';
+import Providers            from  '@app/providers';
 
 import '@styles/globals.css';
-
-import Providers            from  '@app/providers';
-import ThemeProvider        from  '@app/theme-provider';
 
 export const metadata: Metadata = {
   title: 'Literalis',

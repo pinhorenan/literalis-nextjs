@@ -1,7 +1,7 @@
 // File: src/app/profile/[username]/page.tsx
 
 import { notFound } from 'next/navigation';
-import { prisma } from '@server/prisma';
+import { prisma }   from '@server/prisma';
 import ProfileShell from '@components/profile/ProfileShell';
 import type { ClientPost } from '@/src/types/posts';
 
@@ -10,7 +10,7 @@ interface ProfilePageProps {
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const { username } = params;
+  const { username } = await params; // ? turbopack tá incomodando se não usar await aqui
 
   const user = await prisma.user.findUnique({
     where:    { username },
@@ -33,38 +33,40 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     orderBy:    { createdAt: 'desc' },
   });
 
-  const posts: ClientPost[] = rawPosts.map((p) => ({
-    id:                 p.id,
-    excerpt:            p.excerpt,
-    progress:           p.progress,
-    createdAt:          p.createdAt.toISOString(),
-    updatedAt:          p.updatedAt.toISOString(),
-    likeCount:          p.likes.length,
-    commentCount:       p.comments.length,
+  const posts: ClientPost[] = rawPosts.map((post) => ({
+    id:                 post.id,
+    excerpt:            post.excerpt,
+    progress:           post.progress,
+    createdAt:          post.createdAt.toISOString(),
+    updatedAt:          post.updatedAt.toISOString(),
+    likeCount:          post.likes.length,
+    commentCount:       post.comments.length,
     likedByMe:          false,
     isFollowingAuthor:  false,
     
     author: {
-      username:         p.author.username,
-      name:             p.author.name,
-      avatarUrl:        p.author.avatarUrl,
+      username:         post.author.username,
+      name:             post.author.name,
+      avatarUrl:        post.author.avatarUrl,
     },
 
     book: {
-      isbn:             p.book.isbn,
-      title:            p.book.title,
-      author:           p.book.author,
-      coverUrl:         p.book.coverUrl,
+      isbn:             post.book.isbn,
+      title:            post.book.title,
+      author:           post.book.author,
+      coverUrl:         post.book.coverUrl,
     },
 
-    comments: p.comments.map((c) => ({
-      id:               c.id,
-      content:          c.content,
-      createdAt:        c.createdAt.toISOString(),
-      author: {
-        username:       c.author.username,
-        name:           c.author.name,
-        avatarUrl:      c.author.avatarUrl,
+    comments:           post.comments.map((comment) => (
+      {
+      id:               comment.id,
+      content:          comment.content,
+      createdAt:        comment.createdAt.toISOString(),
+      author: 
+        {
+        username:       comment.author.username,
+        name:           comment.author.name,
+        avatarUrl:      comment.author.avatarUrl,
       },
     })),
   }));

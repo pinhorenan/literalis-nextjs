@@ -1,28 +1,23 @@
-// File: src/app/profile/[username]/shelf/page.tsx
+// File: src/app/profile/[username]/bookshelf/page.tsx
 
-import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@server/auth';
-import { prisma } from '@server/prisma';
+import { authOptions }      from '@server/auth';
+import { prisma }           from '@server/prisma';
 
-import BookshelfClient from '@components/shelf/BookshelfClient';
+import BookshelfClient from '@components/bookshelf/BookshelfClient';
 
-interface ShelfPageProps {
+interface BookshelfPageProps {
   params: { username: string };
 }
 
-export const metadata: Metadata = {
-  title: 'Estante - Literalis',
-};
-
-export default async function ShelfPage({ params }: ShelfPageProps) {
+export default async function BookshelfPage({ params }: BookshelfPageProps) {
   const { username } =  params;
 
   const session = await getServerSession(authOptions);
   const me = session?.user?.username;
   const isOwner = !!me && me === username;
 
-  const shelfItems = await prisma.userBook.findMany({
+  const bookshelfItems = await prisma.userBook.findMany({
     where: { userUsername: username },
     include: {
       book: {
@@ -42,10 +37,10 @@ export default async function ShelfPage({ params }: ShelfPageProps) {
     orderBy: { addedAt: 'desc' },
   });
 
-  const initialItems = shelfItems.map((item) => ({
-    book: item.book,
+  const initialItems = bookshelfItems.map((item) => ({
+    book:     item.book,
     progress: item.progress,
-    addedAt: item.addedAt.toISOString(),
+    addedAt:  item.addedAt.toISOString(),
   }));
 
   return (

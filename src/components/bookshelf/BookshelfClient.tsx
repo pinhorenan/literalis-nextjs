@@ -1,12 +1,17 @@
-// File: src/components/shelf/BookshelfClient.tsx
+// File: src/components/bookshelf/BookshelfClient.tsx
 'use client';
 
-import { useState, useMemo } from 'react';
 import clsx from 'clsx';
+import { 
+    Grid, 
+    List, 
+    SortAsc, 
+    SortDesc 
+} from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { Button } from '@components/ui/Buttons';
-import { Grid, List, SortAsc, SortDesc } from 'lucide-react';
 import SearchBar from '@components/ui/SearchBar';
-import ShelfItem, {type ShelfItemType} from '@components/shelf/ShelfItem';
+import ShelfItem, {type ShelfItemType} from '@components/bookshelf/BookShelfItem';
 
 interface BookshelfClientProps {
     initialItems: ShelfItemType[];
@@ -26,11 +31,11 @@ export default function BookshelfClient({
     const [viewMode, setViewMode]       = useState<'grid' | 'list'>('grid');
 
     const updateProgress = async (isbn: string, old: number) => {
-        const input = prompt('Novo progresso (0-100):', old.toString())
+        const input = prompt('Novo progresso (0-100):', old.toString()) // TODO: melhorar, não usar prompt
         if (!input) return;
         const prog = Math.max(0, Math.min(100, parseInt(input, 10)));
         if (isNaN(prog)) return;
-        await fetch(`/api/users/${username}/shelf/${isbn}`, {
+        await fetch(`/api/users/${username}/bookshelf/${isbn}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ progress: prog }),
@@ -41,8 +46,8 @@ export default function BookshelfClient({
     };
 
     const removeFromShelf = async (isbn: string) =>{
-        if (!confirm('Remover estelivro da sua estante?')) return; // todo melhorar ne
-        await fetch(`/api/users/${username}/shelf/${isbn}`, { method: 'DELETE' });
+        if (!confirm('Remover estelivro da sua estante?')) return; // TODO: melhorar, não usar confirm
+        await fetch(`/api/users/${username}/bookshelf/${isbn}`, { method: 'DELETE' });
         setItems(lst => lst.filter(i => i.book.isbn !== isbn));
     };
 
