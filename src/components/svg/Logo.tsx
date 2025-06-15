@@ -1,8 +1,6 @@
 // File: src/components/svg/Logo.tsx
-'use client';
 
 interface LogoProps {
-  theme?: 'dark' | 'light';
   className?: string;
   size?: number;
   fillColor?: string;
@@ -10,17 +8,9 @@ interface LogoProps {
 }
 
 export function Logo({
-  theme,
   className,
   size = 60,
-  fillColor,
-  strokeColor,
 }: LogoProps) {;
-
-  const isDark = theme === 'dark';
-
-  const fallbackFill = isDark ? '#c8c6be' : '#5A5223';         // claro no dark, escuro no light
-  const fallbackStroke = isDark ? '#d4b483' : '#76736b';       // mais dourado no dark
 
   return (
     <svg
@@ -34,15 +24,15 @@ export function Logo({
       <g>
         <path
           d="M81.6568 80.0517H107.827C107.827 80.0517 107.827 61.3533 107.827 47.4655C107.827 40.2427 100.929 31.1596 87.7803 31.7947C78.3965 31.5985 67.9054 38.7721 67.6049 47.4655C66.9788 65.58 67.4484 74.6657 67.6049 80.0517H81.6568Z"
-          fill={fillColor ?? fallbackFill}
+          fill="var(--text-primary)"
         />
         <path
           d="M46.5556 1H23.5772V40.5259V80.0517H46.5556V1Z"
-          fill={fillColor ?? fallbackFill}
+          fill="var(--text-primary)"
         />
         <path
           d="M23.5772 1H46.5556V80.0517M23.5772 1V40.5259V80.0517H46.5556M23.5772 1H2V47.4655V106L23.5772 86.0862L46.5556 106V80.0517M67.6049 80.0517C67.4484 74.6657 66.9788 65.58 67.6049 47.4655C67.9054 38.7721 78.3965 31.5985 87.7804 31.7947C100.929 31.1596 107.827 40.2427 107.827 47.4655C107.827 61.3533 107.827 80.0517 107.827 80.0517H81.6568H67.6049ZM67.6049 80.0517H46.5556"
-          stroke={strokeColor ?? fallbackStroke}
+          stroke="var(--text-primary)"
           strokeWidth="0.543715"
         />
       </g>

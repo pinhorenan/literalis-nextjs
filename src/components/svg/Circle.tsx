@@ -13,7 +13,7 @@ export function CircleVector({ className }: { className?: string }) {
         cy="150"
         r="140"
         fill="var(--color-accent)"
-        opacity="0.2"
+        opacity="0.3"
       />
     </svg>
   );

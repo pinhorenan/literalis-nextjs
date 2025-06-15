@@ -4,7 +4,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, UserRoundPlusIcon } from 'lucide-react';
 import { Button, ThemeToggle } from '@components/ui/Buttons';
 import { CircleVector } from '@components/svg/Circle';
 import { Logo } from '@components/svg/Logo';
@@ -15,7 +15,11 @@ export default function LandingContent() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="relative isolate min-h-screen overflow-hidden bg-gradient-to-b from-[var(--surface-bg)] to-[var(--surface-alt)] px-6 py-16 lg:px-24 flex flex-col-reverse lg:flex-row items-center justify-evenly gap-12"
+      className="
+        relative isolate min-h-screen overflow-hidden
+        bg-gradient-to-b from-[var(--surface-bg)] to-[var(--surface-alt)] 
+        px-6 py-16 lg:px-24 
+        flex flex-col-reverse lg:flex-row items-center justify-evenly gap-12"
     >
     {/* — Botões fixos no topo — */}
       <div className="absolute top-4 right-6 flex items-center gap-2 z-20">
@@ -50,7 +54,7 @@ export default function LandingContent() {
        />
 
       {/* — Bloco de Texto — */}
-      <div className="max-w-xl space-y-6 text-left relative z-10">
+      <div className="max-w-xl space-y-6 text-left relative z-10 pb-2">
 
         {/* — Logo + Nome — */}
         <motion.div
@@ -114,11 +118,23 @@ export default function LandingContent() {
           <Link href="/signup">
             <Button
               size="lg"
-              className="rounded-xl border-[var(--border-base)] bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)]"
+              className="
+                rounded-lg px-8 py-4
+                text-lg font-extrabold tracking-tight
+                bg-[var(--surface-card)]
+                hover:bg-[var(--surface-card-hover)]
+                text-[var(--text-primary)]
+                shadow-lg
+                border-2 border-[var(--border-subtle)]
+                hover:scale-[1.03] hover:shadow-xl
+                transition-transform duration-200
+                flex items-center gap-2"
             >
+              <UserRoundPlusIcon className="w-5 h-5" />
               Crie sua conta
             </Button>
           </Link>
+
         </motion.div>
       </div>
 

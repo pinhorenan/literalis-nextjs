@@ -48,7 +48,6 @@ export default function PrimarySidebar() {
   const buttonClass =
     'bg-transparent hover:bg-[var(--surface-card-hover)] gap-3 rounded-lg border-none text-[var(--text-secondary)] text-base';
 
-  const logoItem =  isDark ? <Logo theme='dark' /> : <Logo theme='light' /> ;  
 
   // itens de baixo
   const bottomItems = [
@@ -68,11 +67,10 @@ export default function PrimarySidebar() {
   return (
     <SidebarShell position="left">
       <div className="flex flex-col justify-between h-full py-2">
-        {/* topo */}
         <div>
 
           <div className="flex items-center gap-2 px-4">
-            {logoItem}
+            <Logo />
             <strong className="text-[var(--text-primary)]">Literalis</strong>
           </div>
           <nav className="flex flex-col items-start gap-1 mt-2">
