@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Literalis
 
-## Getting Started
+Literalis é uma plataforma social voltada para amantes da literatura. Conecte-se com leitores, compartilhe suas leituras, acompanhe seu progresso e descubra novos livros e autores.
 
-First, run the development server:
+## Funcionalidades
+
+* **Feed Personalizado**: Acompanhe as postagens dos usuários que você segue ou descubra novos leitores.
+* **Estante Virtual**: Organize e gerencie os livros que você está lendo, já leu ou pretende ler.
+* **Progresso de Leitura**: Registre o seu progresso e acompanhe suas estatísticas.
+* **Interações Sociais**: Comente, curta e interaja com outros leitores.
+* **Sistema de Busca**: Encontre livros e usuários facilmente com uma pesquisa integrada.
+
+## Tecnologias
+
+* **Next.js** com React para frontend
+* **Tailwind CSS** para estilização
+* **Prisma** como ORM
+* **PostgreSQL** como banco de dados
+* **NextAuth** para autenticação
+
+## Configuração do Ambiente
+
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/pinhorenan/literalis.git
+```
+
+2. Instale as dependências:
+
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+
+Crie um arquivo `.env.local` na raiz do projeto com as variáveis necessárias:
+
+```env
+DATABASE_URL=URL_DO_SEU_BANCO
+NEXTAUTH_SECRET=SUA_CHAVE_SECRETA
+```
+
+4. Gere o schema do banco de dados:
+
+```bash
+npx prisma migrate dev
+```
+
+5. Inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Agora, a aplicação estará disponível em `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura do Projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* `src/app`: Páginas principais do Next.js.
+* `src/components`: Componentes React reutilizáveis.
+* `src/server`: Código relacionado ao backend (Instância do Prisma, AuthOptions).
+* `public`: Arquivos estáticos (imagens, ícones).
 
-## Learn More
+## Contribuições
 
-To learn more about Next.js, take a look at the following resources:
+Contribuições são bem-vindas. Abra uma issue caso encontre problemas ou tenha sugestões. Sinta-se à vontade para abrir Pull Requests com melhorias ou novas funcionalidades.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Licença
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este projeto está sob licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
