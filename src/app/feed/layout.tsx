@@ -1,8 +1,9 @@
 // File: src/app/profile/layout.tsx
-import { ReactNode }  from 'react';
-import PrimarySidebar from '@components/layout/PrimarySidebar';
-import FeedSidebar    from '@components/layout/FeedSidebar';
-import { MobileBottomNav } from '@components/layout/MobileBottomNav';
+
+import { ReactNode }    from 'react';
+import PrimarySidebar   from '@components/layout/PrimarySidebar';
+import FeedSidebar      from '@components/layout/FeedSidebar';
+import MobileBottomNav  from '@components/layout/MobileBottomNav';
 
 export default function FeedLayout({ children }: { children: ReactNode }) {
   return (
@@ -11,7 +12,7 @@ export default function FeedLayout({ children }: { children: ReactNode }) {
         <PrimarySidebar />
       </aside>
 
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 my-6">
         {children}
       </main>
       

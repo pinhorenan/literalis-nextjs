@@ -1,31 +1,39 @@
-// File: src/components/post/PostComments.tsx
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
-import { useRelativeTime } from '@hooks/useRelativeTime';
 import type { ClientComment } from '@/src/types/posts';
+import useRelativeTime  from '@hooks/useRelativeTime';
 
 export interface Props {
   comments: ClientComment[];
 }
 
-export function PostComments({ comments }: Props) {
+export default function PostComments({ comments }: Props) {
   const [showAll, setShowAll] = useState(false);
-  const [height, setHeight]   = useState(0);
-  
+  const [height, setHeight] = useState(0);
+
   const fullRef = useRef<HTMLDivElement>(null);
   const limitedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const newHeight = showAll
-      ? fullRef.current?.scrollHeight
-      : limitedRef.current?.scrollHeight;
+    const targetRef = showAll ? fullRef : limitedRef;
 
-    if (newHeight) {
-      setHeight(newHeight);
-    }
+    const resize = () => {
+      if (targetRef.current) {
+        setHeight(targetRef.current.scrollHeight);
+      }
+    };
+
+    resize(); // mede na entrada
+
+    const observer = new ResizeObserver(resize);
+    if (targetRef.current) observer.observe(targetRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [showAll, comments.length]);
 
   if (comments.length === 0) {
@@ -38,7 +46,6 @@ export function PostComments({ comments }: Props) {
 
   return (
     <div className="px-4 py-2 space-y-3">
-      {/* Container c/ animação */}
       <div
         style={{
           maxHeight: `${height}px`,
@@ -46,19 +53,16 @@ export function PostComments({ comments }: Props) {
           transition: 'max-height 0.4s ease-in-out',
         }}
       >
-
-        {/* Lista completa */}
         <div ref={fullRef}>
           {comments.map((comment) => (
             <CommentItem key={comment.id} comment={comment} />
           ))}
         </div>
 
-        {/* Lista reduzida invisível para medir altura */}
         <div
-            ref={limitedRef}
-            className="invisible absolute top-0 left-0 pointers-events-none h-auto"
-            aria-hidden
+          ref={limitedRef}
+          className="invisible absolute top-0 left-0 pointer-events-none h-auto"
+          aria-hidden
         >
           {comments.slice(0, 3).map((comment) => (
             <CommentItem key={comment.id} comment={comment} />
@@ -66,7 +70,6 @@ export function PostComments({ comments }: Props) {
         </div>
       </div>
 
-      {/* Botão de expandir/recolher */}
       {comments.length > 3 && (
         <button
           className="text-sm text-[var(--text-primary)] cursor-pointer hover:underline block mx-auto mt-2"
@@ -83,14 +86,9 @@ export function PostComments({ comments }: Props) {
   );
 }
 
-/* Componente reutilizável */
-function CommentItem({
-  comment,
-}: {
-  comment: ClientComment;
-}) {
+function CommentItem({ comment }: { comment: ClientComment }) {
   return (
-    <div className="flex items-start gap-3 mb-2">
+    <div className="flex items-start gap-3 mb-4">
       <Image
         src={comment.author.avatarUrl || '/assets/avatars/default.jpg'}
         alt={comment.author.name ?? 'Usuário'}
@@ -98,15 +96,15 @@ function CommentItem({
         height={28}
         className="rounded-full mt-0.5"
       />
-      <div className="flex-1 text-sm space-y-1">
+      <div className="flex-1 text-sm h-auto">
         <Link href={`/profile/${comment.author.username}`}>
           <strong>{comment.author.name}</strong>
         </Link>
-        <p className="text-sm break-words">{comment.content}</p>
+        <p className="text-xs">{comment.content}</p>
       </div>
       <time className="text-xs text-nowrap text-[var(--text-tertiary)] whitespace-nowrap">
-        {useRelativeTime((comment.createdAt))}
+        {useRelativeTime(comment.createdAt)}
       </time>
     </div>
-  )
+  );
 }

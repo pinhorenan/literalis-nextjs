@@ -12,7 +12,7 @@ import type { ClientPost } from '@/src/types/posts';
  * @param tab - aba selecionada, 'friends' ou 'discover'
  * @returns Lista de posts, estado de carregamento e erro
  */
-export function useFeed(tab: 'friends' | 'discover') {
+export default function useFeed(tab: 'friends' | 'discover') {
   const { data: session } = useSession();
   const mode = tab === 'friends' ? 'friends' : 'all';
 

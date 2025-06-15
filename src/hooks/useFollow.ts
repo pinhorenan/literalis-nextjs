@@ -9,7 +9,7 @@ import { useSession } from 'next-auth/react';
  * @param targetUsername username do alvo
  * @param initiallyFollowing opcional - estado já conhecido (evita 1ª requisição)
  */
-export function useFollow(targetUsername: string, initiallyFollowing?: boolean) {
+export default function useFollow(targetUsername: string, initiallyFollowing?: boolean) {
   const { data: session, status } = useSession();
   const loggedIn = status === 'authenticated';
   const currentUser = session?.user?.username;

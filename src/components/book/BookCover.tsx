@@ -18,7 +18,7 @@ interface BookCoverProps {
   className?: string;
 }
 
-export function BookCover({
+export default function BookCover({
   src,
   alt,
   width = 120,

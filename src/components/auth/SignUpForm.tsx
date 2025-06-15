@@ -14,7 +14,7 @@ interface SignUpFormProps {
 // ? considerar a opção e fazer o upload do avatar, abrindo explorador de arquivos
 // ? considerar redirecionamento para página de boas vindas com configurações iniciais e coleta de dados adicionais
 // ? na página de boas vindas, considerar a opção de seguir usuários populares ou amigos, assim como adicionar livros que tem interesse, gerando dados para futuras *recomendações personalizadas*
-export function SignUpForm({
+export default function SignUpForm({
   redirectTo = '/signin',
   compact = false,
   onSuccess,

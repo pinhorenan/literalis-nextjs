@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export function UserSummary() {
+export default function UserSummary() {
     const { data: session, status } = useSession();
     console.log('Sessão: ', session);
 

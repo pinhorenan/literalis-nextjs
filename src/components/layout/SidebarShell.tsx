@@ -1,4 +1,4 @@
-// src/components/layout/SidebarShell.tsx
+// File: src/components/layout/SidebarShell.tsx
 'use client';
 
 import clsx from 'clsx';
@@ -11,7 +11,7 @@ interface SidebarShellProps {
     children: ReactNode;
 }
 
-export function SidebarShell({ position, bg = true, border = true, children }: SidebarShellProps) {
+export default function SidebarShell({ position, bg = true, border = true, children }: SidebarShellProps) {
     return (
         <aside className="relative flex-shrink-0 w-[var(--size-sidebar)]">
             <div

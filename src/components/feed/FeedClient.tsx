@@ -1,13 +1,13 @@
 // File: src/components/feed/FeedClient.tsx
 'use client';
 
-import { useState } from 'react';
 import useSWR from 'swr';
+import { useState } from 'react';
 import { FeedSwitch, type Tab } from '@components/feed/FeedSwitch';
-import { PostCard }         from '@components/post/Post';
-import NewPostForm          from '@components/post/NewPostForm';
-import PostSkeleton         from '@components/post/PostSkeleton';
-import type { ClientPost }  from '@/src/types/posts';
+import PostCard                 from '@components/post/Post';
+import NewPostModal             from '@components/post/NewPostModal';
+import PostSkeleton             from '@components/post/PostSkeleton';
+import type { ClientPost }      from '@/src/types/posts';
 
 const fetcher = (url: string) =>
   fetch(url, { credentials: 'include' })
@@ -55,9 +55,7 @@ export default function FeedClient({ initialPosts, initialTab }: FeedClientProps
 
   return (
     <section className="flex flex-col gap-4">
-
-      <NewPostForm />
-
+      <NewPostModal />
       <FeedSwitch onChange={setTab} />
 
       {isLoading ? (

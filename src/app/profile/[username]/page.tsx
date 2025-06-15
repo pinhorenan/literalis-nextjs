@@ -1,4 +1,5 @@
 // File: src/app/profile/[username]/page.tsx
+
 import { notFound } from 'next/navigation';
 import { prisma } from '@server/prisma';
 import ProfileShell from '@components/profile/ProfileShell';
@@ -9,7 +10,7 @@ interface ProfilePageProps {
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const { username } = await params;
+  const { username } = params;
 
   const user = await prisma.user.findUnique({
     where:    { username },

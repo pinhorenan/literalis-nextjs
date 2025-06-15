@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useClickOutside } from '@hooks/useClickOutside';
-import { Button } from "@components/ui/Buttons";
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical }     from 'lucide-react';
+import { Button }           from "@components/ui/Buttons";
+import useClickOutside      from '@hooks/useClickOutside';
 
 interface OptionsMenuProps {
   onEdit: () => void;
@@ -12,7 +12,7 @@ interface OptionsMenuProps {
   className?: string;
 }
 
-export function OptionsMenu({ onEdit, onDelete, className }: OptionsMenuProps) {
+export default function OptionsMenu({ onEdit, onDelete, className }: OptionsMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

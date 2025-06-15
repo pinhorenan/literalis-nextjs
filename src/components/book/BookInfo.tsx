@@ -11,7 +11,7 @@ interface BookInfoProps {
   className?: string;
 }
 
-export function BookInfo({
+export default function BookInfo({
   book,
   showPublicationDate = false,
   strongIsbnLabel = false,

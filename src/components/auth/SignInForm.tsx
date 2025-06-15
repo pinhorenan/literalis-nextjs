@@ -1,11 +1,11 @@
-// File src/components/auth/SignInForm.tsx
+// File: src/components/auth/SignInForm.tsx
 'use client';
 
 import { useState, useRef, FormEvent } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@components/ui/Buttons';
+import Link from 'next/link';
 
 interface LoginFormProps {
     redirectTo?: string;
@@ -13,7 +13,7 @@ interface LoginFormProps {
     compact?: boolean;
 }
 
-export function LoginForm({
+export default function LoginForm({
     redirectTo = '/feed',
     onSuccess,
     compact = false,

@@ -9,14 +9,16 @@ import { Heart, MessageCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import { FollowButton } from '@components/ui/Buttons';
-import { BookCover }    from '@components/book/BookCover';
-import { BookInfo }     from '@components/book/BookInfo';
-import { PostComments } from '@components/post/PostComments';
+import { FollowButton }     from '@components/ui/Buttons';
+import OptionsMenu          from '@components/ui/OptionsMenu';
+import BookCover            from '@components/book/BookCover';
+import BookInfo             from '@components/book/BookInfo';
+import PostComments         from '@components/post/PostComments';
 
-import { useRelativeTime }  from '@hooks/useRelativeTime';
-import { usePostLike }      from '@hooks/usePostLike';
-import { useComments }      from '@hooks/useComments';
+import useRelativeTime      from '@hooks/useRelativeTime';
+import usePostLike          from '@hooks/usePostLike';
+import useComments          from '@hooks/useComments';
+
 import type { ClientPost }  from '@/src/types/posts';
 
 interface Props {
@@ -30,11 +32,12 @@ interface Props {
 // todo: o autor do post deve poder excluir comentários. o autor do comentário deve poder editar/excluir o próprio comentário
 // todo: adicionar o botão de compartilhar post (com link para o post) e o botão de compartilhar livro (com link para o livro)
 // todo: adicionar likes e replies em comentários
-export function PostCard({ post, isProfile = false, onFollowChange }: Props) {
+export default function PostCard({ post, isProfile = false, onFollowChange }: Props) {
   const { data: session, status } = useSession();
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const isOwner = session?.user.username === post.author.username;
 
   const { liked, likeCount, loading: likeLoading, toggleLike } = usePostLike(post.id, post.likedByMe, post.likeCount);
 
@@ -59,7 +62,7 @@ export function PostCard({ post, isProfile = false, onFollowChange }: Props) {
 
   return (
       <article className="border-b border-[var(--border-base)]">
-        <div className="flex flex-col gap-4 p-4 md:flex-row md:gap-6">
+        <div className="relative flex flex-col gap-4 p-4 md:flex-row md:gap-6">
           {/* Livro e info */}
           <div className="flex flex-row gap-4 md:basis-1/2 md:border-r border-[var(--border-base)]">
             <BookCover
@@ -87,6 +90,16 @@ export function PostCard({ post, isProfile = false, onFollowChange }: Props) {
               strongIsbnLabel
             />
           </div>
+
+          {/* Opções do dono do post */}
+          {isOwner && (
+            <div className="absolute top-4 right-4 z-10">
+              <OptionsMenu
+                onEdit={() => console.log('Editar post', post.id)}
+                onDelete={() => console.log('Excluir post', post.id)}
+              />
+            </div>
+          )}
 
           {/* Autor e progresso */}
           <div className="flex flex-col gap-2 md:basis-1/2 md:ml-4">

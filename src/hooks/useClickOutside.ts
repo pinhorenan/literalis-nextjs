@@ -6,7 +6,7 @@ import { useEffect, RefObject } from 'react';
  * @param ref - Referência para o elemento-alvo
  * @param callback - Função chamada ao clicar fora
  */
-export function useClickOutside(
+export default function useClickOutside(
   ref: RefObject<HTMLElement | null>,
   callback: () => void
 ) {

@@ -1,9 +1,9 @@
 // File: src/components/sidebar/FeedSidebar.tsx
 'use client';
 
-import { SidebarShell } from '@/src/components/layout/SidebarShell';
-import { UserSummary } from '@components/ui/UserSummary';
-import { Button } from '@components/ui/Buttons';
+import   SidebarShell  from '@components/layout/SidebarShell';
+import   UserSummary   from '@components/ui/UserSummary';
+import { Button  } from '@components/ui/Buttons';
 import { BookOpen } from 'lucide-react';
 
 interface FeedSidebarProps {

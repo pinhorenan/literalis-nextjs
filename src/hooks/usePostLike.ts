@@ -16,7 +16,7 @@ interface UsePostLikeReturn {
  * @param initiallyLiked estado inicial (feed)
  * @param initialCount contagem inicial de likes
  */
-export function usePostLike(
+export default function usePostLike(
   id: string,
   initiallyLiked: boolean,
   initialCount: number

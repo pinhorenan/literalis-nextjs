@@ -1,9 +1,8 @@
 // File: src/app/api/me/bookshelf/route.ts
-
+import { NextResponse }     from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@server/auth';
-import { prisma } from '@server/prisma';
-import { NextResponse } from 'next/server';
+import { authOptions }      from '@server/auth';
+import { prisma }           from '@server/prisma';
 
 export async function GET() {
     const session = await getServerSession(authOptions);
@@ -16,6 +15,7 @@ export async function GET() {
                 select: {
                     isbn: true,
                     title: true,
+                    pages: true,
                     coverUrl: true,
                 },
             },

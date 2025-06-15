@@ -9,7 +9,7 @@ export interface SearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInput
     onChange: (value: string) => void;
 }
 
-export function SearchBar({
+export default function SearchBar({
     className = '',
     onChange,
     value,

@@ -1,11 +1,11 @@
 // File: src/components/book/BookCard.tsx
 'use client';
 
-import { BookCover, BookCoverSkeleton } from '@components/book/BookCover';
-import { BookInfo, BookInfoSkeleton } from '@components/book/BookInfo';
+import BookCover, { BookCoverSkeleton } from '@components/book/BookCover';
+import BookInfo,  { BookInfoSkeleton  } from '@components/book/BookInfo';
 import type { Book } from '@prisma/client';
 
-export function BookCard({ book }: { book: Book }) {
+export default function BookCard({ book }: { book: Book }) {
   return (
     <div
       className="

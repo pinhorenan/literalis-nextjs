@@ -2,10 +2,10 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { User, Users, Globe, BookOpen, Search, MessageSquare, Bell, LogIn, Home } from 'lucide-react';
+import { User, BookOpen, Search, MessageSquare, Bell, LogIn, Home } from 'lucide-react';
 
-import { SidebarShell } from '@/src/components/layout/SidebarShell';
-import { LogoutMenu } from '@components/ui/LogoutMenu';
+import SidebarShell from '@components/layout/SidebarShell';
+import LogoutMenu   from '@components/ui/LogoutMenu';
 import { Button, LogoButton } from '@components/ui/Buttons';
 
 interface NavItem {
@@ -20,12 +20,11 @@ export default function PrimarySidebar() {
   
   const nav: NavItem[] = [
           { label: 'Início',        icon: Home,           href: '/feed' },
-          { label: 'Pesquisar',     icon: Search,         href: '/search' },
         ...(username
         ? [ 
           { label: 'Perfil',        icon: User,           href: `/profile/${username}`        },
           { label: 'Estante',       icon: BookOpen,       href: `/profile/${username}/shelf/` },
-          { label: 'Amigos',        icon: Users,          href: '/friends'                    },
+          { label: 'Pesquisar',     icon: Search,         href: '/search' },
           { label: 'Mensagens',     icon: MessageSquare,  href: '/message'                    },
           { label: 'Notificações',  icon: Bell,           href: '/notifications'              },
           ]

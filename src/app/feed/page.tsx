@@ -1,4 +1,5 @@
 // File: src/app/feed/page.tsx
+
 import FeedClient                   from '@components/feed/FeedClient';
 import { prisma }                   from '@server/prisma';
 import { mapRawToClientPost }       from '@lib/mapPost';

@@ -6,7 +6,7 @@ import { signOut }  from 'next-auth/react';
 import { Settings, LogOut } from 'lucide-react';
 import { Button, ThemeToggle } from '@components/ui/Buttons';
 
-export function LogoutMenu() {
+export default function LogoutMenu() {
     const [open, setOpen] = useState(false);
 
     return (

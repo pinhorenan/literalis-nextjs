@@ -16,7 +16,7 @@ interface UseCommentsReturn {
  * @param postId ID do post alvo
  * @param initialComments Comentários iniciais (opcional)
  */
-export function useComments(
+export default function useComments(
   postId: string,
   initialComments: ClientComment[] = []
 ): UseCommentsReturn {

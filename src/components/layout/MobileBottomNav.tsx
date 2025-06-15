@@ -4,7 +4,6 @@
 import { Home, Search, User, BookOpen } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import clsx from 'clsx';
 
 const navItems = [
     { icon: Home,       href: '/feed',              label: 'Início' },
@@ -13,7 +12,7 @@ const navItems = [
     { icon: User,       href: '/profile/me',        label: 'Perfil' },
 ];
 
-export function MobileBottomNav() {
+export default function MobileBottomNav() {
     const { data: session } = useSession();
     const username = session?.user?.username;
 

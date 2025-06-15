@@ -9,7 +9,7 @@ const DAY = 24 * HOUR;
  * @param date - Uma instância de Date ou string ISO.
  * @param short - Quando true, usa versões curtas ("3 h"); se false, usa "há 3 horas".
  */
-export function useRelativeTime(date: Date | string, short = true): string {
+export default function useRelativeTime(date: Date | string, short = true): string {
   const d = date instanceof Date ? date : new Date(date);
   const now = Date.now();
   const diff = now - d.getTime();
